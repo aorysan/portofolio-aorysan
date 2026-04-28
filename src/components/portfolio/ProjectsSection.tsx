@@ -1,4 +1,4 @@
-import { Github, Folder } from 'lucide-react';
+import { ExternalLink, Github, Folder } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const ProjectsSection = () => {
@@ -8,6 +8,12 @@ const ProjectsSection = () => {
       description: 'A Point of Sale system designed for efficient transaction management and inventory tracking.',
       tags: ['Laravel', 'MySQL', 'PHP'],
       github: 'https://github.com/aorysan/POS-System',
+    },
+    {
+      title: 'Rest Area Business - Idle Tycoon Game',
+      description: 'A game jam project about managing a rest area business and handling the mudik rush with a tycoon-style loop.',
+      tags: ['Unity', 'Game Jam', 'Simulation', 'Tycoon'],
+      itchio: 'https://itch.io/jam/tsa-gamefest-game-jam/rate/2845746',
     },
   ];
 
@@ -45,15 +51,28 @@ const ProjectsSection = () => {
                     {project.title}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <a
-                      href={project.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label="View on GitHub"
-                    >
-                      <Github className="w-5 h-5" />
-                    </a>
+                    {project.github && (
+                      <a
+                        href={project.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label="View on GitHub"
+                      >
+                        <Github className="w-5 h-5" />
+                      </a>
+                    )}
+                    {project.itchio && (
+                      <a
+                        href={project.itchio}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label="View on itch.io"
+                      >
+                        <ExternalLink className="w-5 h-5" />
+                      </a>
+                    )}
                   </div>
                 </div>
 
