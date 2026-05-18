@@ -60,7 +60,7 @@ const AboutSection = () => {
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
             { value: '2+', label: 'Years Experience' },
-            { value: '10+', label: 'Projects Completed' },
+            { value: '3+', label: 'Projects Completed' },
             { value: '5+', label: 'Technologies' },
             { value: '100%', label: 'Dedication' },
           ].map((stat) => (
