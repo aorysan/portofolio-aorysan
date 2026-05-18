@@ -15,6 +15,13 @@ const ProjectsSection = () => {
       tags: ['Unity', 'Game Jam', 'Simulation', 'Tycoon'],
       itchio: 'https://itch.io/jam/tsa-gamefest-game-jam/rate/2845746',
     },
+    {
+      title: 'TrasMart',
+      description: 'A modern web storefront for TrasMart. Live site and source code linked below.',
+      tags: ['Website', 'Vercel'],
+      github: 'https://github.com/aorysan/trasmart-web',
+      website: 'https://trasmart-web.vercel.app/',
+    },
   ];
 
   return (
@@ -62,13 +69,13 @@ const ProjectsSection = () => {
                         <Github className="w-5 h-5" />
                       </a>
                     )}
-                    {project.itchio && (
+                    {(project.website || project.itchio) && (
                       <a
-                        href={project.itchio}
+                        href={project.website ?? project.itchio}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-                        aria-label="View on itch.io"
+                        aria-label={project.website ? 'Visit site' : 'View on itch.io'}
                       >
                         <ExternalLink className="w-5 h-5" />
                       </a>
