@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 const ProjectsSection = () => {
   const projects = [
     {
-      title: 'POS-System',
-      description: 'A Point of Sale system designed for efficient transaction management and inventory tracking.',
-      tags: ['Laravel', 'MySQL', 'PHP'],
-      github: 'https://github.com/aorysan/POS-System',
+      title: 'KampungKu',
+      description: 'A Flutter app for kampung management with role-based authentication, warga data, iuran keuangan, marketplace, activity history, and real-time dashboard metrics.',
+      tags: ['Flutter', 'Firebase', 'Dart', 'Cloudinary'],
+      github: 'https://github.com/aorysan/jawara_kel3',
     },
     {
       title: 'Rest Area Business - Idle Tycoon Game',
