@@ -18,7 +18,7 @@ const projects: Project[] = [
     tags: ['Unity', 'Game Jam', 'Simulation', 'Tycoon'],
     github: `${GITHUB_URL}/rest-area-tycoon`,
     itchio: 'https://itch.io/jam/tsa-gamefest-game-jam/rate/2845746',
-    img: '/img/tycoon/tycoon.png',
+    img: 'img/tycoon/tycoon.png',
     imageLabel: 'Rest Area Tycoon',
   },
   {
@@ -27,7 +27,7 @@ const projects: Project[] = [
     tags: ['Website', 'Vercel'],
     github: `${GITHUB_URL}/trasmart-web`,
     website: 'https://trasmart-web.vercel.app/',
-    img: '/img/trasmart/trasmart.png',
+    img: 'img/trasmart/trasmart.png',
     imageLabel: 'TrasMart',
   },
   {

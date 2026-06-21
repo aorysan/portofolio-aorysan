@@ -28,8 +28,8 @@ const slides: GallerySlide[] = [
     description: 'An idle tycoon game about managing a rest area business during mudik rush, built for TSA GameFest game jam.',
     link: 'https://itch.io/jam/tsa-gamefest-game-jam/rate/2845746',
     images: [
-      { src: '/img/tycoon/tycoon.png', label: 'Main Menu' },
-      { src: '/img/tycoon/tycoon1.png', label: 'Gameplay' },
+      { src: 'img/tycoon/tycoon.png', label: 'Main Menu' },
+      { src: 'img/tycoon/tycoon1.png', label: 'Gameplay' },
     ],
   },
   {
@@ -38,9 +38,9 @@ const slides: GallerySlide[] = [
     description: 'A modern web storefront with product listings, shopping cart, and order management system.',
     link: `${GITHUB_URL}/trasmart-web`,
     images: [
-      { src: '/img/trasmart/trasmart.png', label: 'Homepage' },
-      { src: '/img/trasmart/dashboard.png', label: 'Dashboard' },
-      { src: '/img/trasmart/reward.png', label: 'Rewards' },
+      { src: 'img/trasmart/trasmart.png', label: 'Homepage' },
+      { src: 'img/trasmart/dashboard.png', label: 'Dashboard' },
+      { src: 'img/trasmart/reward.png', label: 'Rewards' },
     ],
   },
   {
