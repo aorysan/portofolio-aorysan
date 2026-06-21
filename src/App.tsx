@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import SkipLink from "@/components/SkipLink";
+import LoadingScreen from "@/components/LoadingScreen";
 import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
@@ -14,6 +15,7 @@ const App = () => (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <TooltipProvider>
         <SkipLink />
+        <LoadingScreen />
         <Toaster />
         <Sonner />
         <HashRouter>

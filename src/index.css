@@ -181,11 +181,146 @@
     animation: scaleIn 0.5s ease-out forwards;
   }
 
-  .stagger-1 { animation-delay: 0.1s; }
-  .stagger-2 { animation-delay: 0.2s; }
-  .stagger-3 { animation-delay: 0.3s; }
-  .stagger-4 { animation-delay: 0.4s; }
-  .stagger-5 { animation-delay: 0.5s; }
+  /* ZZZ-style section number */
+  .section-number {
+    @apply font-display font-bold text-[8rem] md:text-[12rem] leading-none select-none;
+    color: hsl(var(--foreground) / 0.04);
+    position: absolute;
+    top: -1rem;
+    right: 0;
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .section-number.left {
+    right: auto;
+    left: -1rem;
+  }
+
+  /* ZZZ-style section divider */
+  .section-divider {
+    @apply w-16 h-1 rounded-full gradient-bg mb-8;
+  }
+
+  /* Loading screen */
+  .loading-screen {
+    @apply fixed inset-0 z-[9999] flex items-center justify-center;
+    background: hsl(var(--background));
+  }
+
+  .loading-logo {
+    @apply font-display font-bold text-3xl;
+    background-image: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .loading-spinner {
+    @apply w-16 h-16 rounded-full border-4 border-border;
+    border-top-color: hsl(var(--primary));
+    animation: spin-slow 1s linear infinite;
+  }
+
+  /* Scroll progress bar */
+  .scroll-progress {
+    @apply fixed top-0 left-0 h-0.5 z-[60] transition-all duration-150;
+    background-image: var(--gradient-primary);
+  }
+
+  /* Enhanced glass */
+  .glass-card-enhanced {
+    @apply bg-card/70 backdrop-blur-xl border border-border/40 rounded-2xl shadow-lg;
+    box-shadow: var(--shadow-md);
+  }
+
+  .glass-card-enhanced:hover {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Section nav indicator (ZZZ-style side numbers) */
+  .section-indicators {
+    @apply fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col items-end gap-6;
+  }
+
+  .section-indicator {
+    @apply flex items-center gap-3 cursor-pointer transition-all duration-300;
+  }
+
+  .section-indicator .indicator-line {
+    @apply h-px transition-all duration-300;
+    background: hsl(var(--foreground) / 0.2);
+    width: 24px;
+  }
+
+  .section-indicator .indicator-label {
+    @apply text-xs font-medium transition-all duration-300;
+    color: hsl(var(--foreground) / 0.3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .section-indicator.active .indicator-line {
+    background-image: var(--gradient-primary);
+    width: 48px;
+  }
+
+  .section-indicator.active .indicator-label {
+    color: hsl(var(--foreground));
+  }
+
+  /* Placeholder image */
+  .placeholder-img {
+    @apply w-full h-full flex items-center justify-center;
+    background-image: var(--gradient-dark);
+  }
+
+  /* Skill progress bar */
+  .skill-progress {
+    @apply h-1.5 rounded-full bg-secondary overflow-hidden;
+  }
+
+  .skill-progress-bar {
+    @apply h-full rounded-full transition-all duration-1000 ease-out;
+    background-image: var(--gradient-primary);
+  }
+
+  /* Project card glow */
+  .project-card {
+    @apply relative bg-card rounded-2xl border border-border/50 overflow-hidden transition-all duration-500;
+  }
+
+  .project-card::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-500 rounded-2xl;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--accent) / 0.05));
+  }
+
+  .project-card:hover {
+    @apply border-primary/30 -translate-y-1;
+    box-shadow: 0 8px 40px hsl(var(--primary) / 0.15);
+  }
+
+  .project-card:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Image overlay play button */
+  .media-overlay {
+    @apply absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300;
+  }
+
+  /* Timeline */
+  .timeline-line {
+    @apply absolute left-0 top-0 bottom-0 w-px;
+    background: linear-gradient(to bottom, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.5), transparent);
+  }
+
+  .timeline-dot {
+    @apply absolute left-0 w-4 h-4 rounded-full border-2 -translate-x-1/2;
+    background: hsl(var(--background));
+    border-color: hsl(var(--primary));
+  }
+
 }
 
 @keyframes float {
@@ -220,7 +355,4 @@
   }
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
+
