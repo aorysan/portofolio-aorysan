@@ -5,7 +5,7 @@ import { GITHUB_URL } from '@/lib/constants';
 import type { Project } from '@/lib/constants';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
-import ReactPlayer from 'react-player/youtube';
+import ReactPlayer from 'react-player';
 
 const projects: Project[] = [
   {
