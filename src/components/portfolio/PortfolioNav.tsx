@@ -8,7 +8,7 @@ const PortfolioNav = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const activeSection = useActiveSection([...SECTION_IDS]);
 
   const toggleMute = () => {

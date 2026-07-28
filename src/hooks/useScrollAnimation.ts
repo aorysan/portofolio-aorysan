@@ -7,7 +7,7 @@ interface UseScrollAnimationOptions {
 }
 
 export const useScrollAnimation = (options: UseScrollAnimationOptions = {}) => {
-  const { threshold = 0.1, rootMargin = '0px 0px -100px 0px', triggerOnce = true } = options;
+  const { threshold = 0.1, rootMargin = '0px 0px -100px 0px', triggerOnce = false } = options;
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -21,7 +21,12 @@ export const useScrollAnimation = (options: UseScrollAnimationOptions = {}) => {
           setIsVisible(true);
           if (triggerOnce) observer.unobserve(element);
         } else if (!triggerOnce) {
-          setIsVisible(false);
+          // Hanya sembunyikan jika elemen keluar dari bawah layar (scroll ke atas)
+          // Ini memastikan animasi berjalan saat scroll dari atas ke bawah,
+          // tapi tidak berjalan saat scroll dari bawah ke atas.
+          if (entry.boundingClientRect.top > 0) {
+            setIsVisible(false);
+          }
         }
       },
       { threshold, rootMargin }

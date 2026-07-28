@@ -83,7 +83,7 @@ const ProjectImage = ({ src, label }: { src?: string; label: string }) => {
 };
 
 const ProjectsSection = () => {
-  const [isMuted, setIsMuted] = useState(false); // Default unmuted (may be blocked by browser autoplay policy)
+  const [isMuted, setIsMuted] = useState(true); // Default muted to comply with browser autoplay policy
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
@@ -113,7 +113,7 @@ const ProjectsSection = () => {
         <iframe
           ref={iframeRef}
           className="absolute top-1/2 left-1/2 w-[100vw] h-[100vh] min-w-[177.77vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-          src="https://www.youtube.com/embed/IYF4hg9-e8A?autoplay=1&mute=0&loop=1&playlist=IYF4hg9-e8A&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1"
+          src="https://www.youtube.com/embed/IYF4hg9-e8A?autoplay=1&mute=1&loop=1&playlist=IYF4hg9-e8A&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1"
           allow="autoplay; encrypted-media"
           frameBorder="0"
         />
