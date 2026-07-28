@@ -5,7 +5,7 @@ import { GITHUB_URL } from '@/lib/constants';
 import type { Project } from '@/lib/constants';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
-import ReactPlayer from 'react-player';
+
 
 const projects: Project[] = [
   {
@@ -85,26 +85,18 @@ const ProjectImage = ({ src, label }: { src?: string; label: string }) => {
 
 const ProjectsSection = () => {
   const [emblaRef] = useEmblaCarousel({ loop: true, align: 'center' }, [Autoplay({ delay: 4000, stopOnInteraction: false })]);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true); // Must start muted for autoplay to work
 
   return (
     <section id="projects" className="h-screen relative overflow-hidden flex items-center bg-black">
       {/* Background Video */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
-        <ReactPlayer
-          url="https://youtu.be/IYF4hg9-e8A?si=PGs1ur77kMuf982d"
-          playing={true}
-          loop={true}
-          muted={isMuted}
-          width="100%"
-          height="200%"
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[1.5] md:scale-[1.2]"
-          config={{
-            youtube: {
-              playerVars: { controls: 0, showinfo: 0, rel: 0, autoplay: 1 }
-            }
-          }}
-        />
+      <div className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
+        <iframe
+          className="absolute top-1/2 left-1/2 w-[100vw] h-[100vh] min-w-[177.77vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          src={`https://www.youtube.com/embed/IYF4hg9-e8A?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=IYF4hg9-e8A&controls=0&showinfo=0&rel=0&modestbranding=1`}
+          allow="autoplay; encrypted-media"
+          frameBorder="0"
+        ></iframe>
         {/* Overlay for better readability */}
         <div className="absolute inset-0 bg-black/50" />
       </div>

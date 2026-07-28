@@ -1,9 +1,8 @@
 import PortfolioNav from '@/components/portfolio/PortfolioNav';
 import HeroSection from '@/components/portfolio/HeroSection';
 import AboutSection from '@/components/portfolio/AboutSection';
-import SkillsSection from '@/components/portfolio/SkillsSection';
 import ProjectsSection from '@/components/portfolio/ProjectsSection';
-import ContentSection from '@/components/portfolio/ContentSection';
+import TechStackSection from '@/components/portfolio/TechStackSection';
 import ContactSection from '@/components/portfolio/ContactSection';
 import PortfolioFooter from '@/components/portfolio/PortfolioFooter';
 
@@ -14,9 +13,8 @@ const Index = () => {
       <main id="main-content">
         <HeroSection />
         <AboutSection />
-        <SkillsSection />
         <ProjectsSection />
-        <ContentSection />
+        <TechStackSection />
         <ContactSection />
       </main>
       <PortfolioFooter />

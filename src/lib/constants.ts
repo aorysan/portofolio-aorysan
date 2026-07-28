@@ -8,7 +8,7 @@ export const MAILTO = `mailto:${EMAIL}` as const;
 export const ITCHIO_URL = 'https://itch.io/jam/tsa-gamefest-game-jam/rate/2845746';
 
 // Navigation
-export const SECTION_IDS = ['home', 'about', 'skills', 'projects', 'media', 'contact'] as const;
+export const SECTION_IDS = ['home', 'about', 'projects', 'media', 'contact'] as const;
 
 export interface NavItem {
   label: string;
@@ -18,7 +18,6 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Home', href: '#home' },
   { label: 'About', href: '#about' },
-  { label: 'Skills', href: '#skills' },
   { label: 'Projects', href: '#projects' },
   { label: 'Media', href: '#media' },
   { label: 'Contact', href: '#contact' },
