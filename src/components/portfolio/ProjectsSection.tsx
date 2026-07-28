@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 import { ExternalLink, Github, Folder } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { GITHUB_URL } from '@/lib/constants';
 import type { Project } from '@/lib/constants';
 import gsap from 'gsap';
@@ -87,114 +86,100 @@ const ProjectImage = ({ src, label }: { src?: string; label: string }) => {
 
 const ProjectsSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   
   useGSAP(() => {
-    if (!containerRef.current || !wrapperRef.current) return;
+    if (!containerRef.current || !trackRef.current) return;
     
-    const cards = gsap.utils.toArray('.z-project-card');
-    const totalScrollHeight = cards.length * 1000;
+    // Calculate how far to scroll the track horizontally
+    const getScrollAmount = () => {
+      const trackWidth = trackRef.current?.scrollWidth || 0;
+      return -(trackWidth - window.innerWidth + window.innerWidth * 0.1); // Keep a bit of padding at the end
+    };
+
+    const tween = gsap.to(trackRef.current, {
+      x: getScrollAmount,
+      ease: "none",
+    });
 
     ScrollTrigger.create({
       trigger: containerRef.current,
-      start: 'top top',
-      end: `+=${totalScrollHeight}`,
+      start: "top top",
+      end: () => `+=${getScrollAmount() * -1}`,
       pin: true,
+      animation: tween,
       scrub: 1,
-      animation: gsap.to(cards, {
-        z: (i) => i * 1500, // Move them closer along Z axis
-        opacity: (i) => (i === cards.length - 1 ? 1 : 0), // Fade out as they pass
-        stagger: 0.5,
-        ease: 'none',
-      })
+      invalidateOnRefresh: true,
     });
-    
-    // Initial setup for cards
-    gsap.set(cards, {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      xPercent: -50,
-      yPercent: -50,
-      z: (i) => -i * 1500, // Start far away
-      opacity: 0,
-      scale: 1,
-      transformPerspective: 1000,
-    });
-    
-    // Ensure first card is visible at start
-    gsap.set(cards[0], { opacity: 1 });
 
   }, { scope: containerRef });
 
   return (
-    <section id="projects" ref={containerRef} className="h-screen bg-card relative overflow-hidden perspective-[1000px]">
-      <div className="container-portfolio relative h-full w-full">
-        <div className="section-number">03</div>
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 text-center w-full">
-            <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-              Projects
-            </span>
-            <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-              Some things I've <span className="gradient-text">built</span>
-            </h2>
-        </div>
+    <section id="projects" ref={containerRef} className="h-screen bg-card relative overflow-hidden flex items-center">
+      <div className="absolute top-10 left-10 z-50">
+        <div className="section-number opacity-20">03</div>
+        <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-2">
+          Projects
+        </span>
+        <h2 className="font-display text-3xl md:text-4xl font-bold">
+          Passing <span className="gradient-text">By</span>
+        </h2>
+      </div>
 
-        <div ref={wrapperRef} className="relative w-full h-full transform-style-3d">
-          {projects.map((project, index) => (
-            <div
-              key={project.title}
-              className="z-project-card project-card group w-full max-w-2xl bg-card border border-border/50 shadow-2xl"
-            >
-              <ProjectImage src={project.img} label={project.imageLabel} />
+      <div ref={trackRef} className="flex gap-16 px-[10vw] items-center w-max h-full">
+        {projects.map((project, index) => (
+          <div
+            key={project.title}
+            className="w-[80vw] md:w-[600px] shrink-0 project-card group bg-card border border-border/50 shadow-2xl rounded-2xl overflow-hidden"
+          >
+            <ProjectImage src={project.img} label={project.imageLabel} />
 
-              <div className="p-6 relative z-10">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-display font-semibold text-xl group-hover:text-primary transition-colors">
-                    {project.title}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {project.github && (
-                      <a
-                        href={project.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Github className="w-5 h-5" />
-                      </a>
-                    )}
-                    {(project.website || project.itchio) && (
-                      <a
-                        href={project.website ?? project.itchio}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <ExternalLink className="w-5 h-5" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
-                  {project.description}
-                </p>
-
-                <div className="flex flex-wrap gap-2">
-                  {project.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1 text-xs font-medium bg-secondary rounded-full text-secondary-foreground"
+            <div className="p-6 relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-display font-semibold text-2xl group-hover:text-primary transition-colors">
+                  {project.title}
+                </h3>
+                <div className="flex items-center gap-3">
+                  {project.github && (
+                    <a
+                      href={project.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 text-muted-foreground hover:text-foreground transition-colors bg-secondary/50 rounded-full"
                     >
-                      {tag}
-                    </span>
-                  ))}
+                      <Github className="w-5 h-5" />
+                    </a>
+                  )}
+                  {(project.website || project.itchio) && (
+                    <a
+                      href={project.website ?? project.itchio}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 text-muted-foreground hover:text-foreground transition-colors bg-secondary/50 rounded-full"
+                    >
+                      <ExternalLink className="w-5 h-5" />
+                    </a>
+                  )}
                 </div>
               </div>
+
+              <p className="text-muted-foreground text-base mb-6 line-clamp-3">
+                {project.description}
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                {project.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-3 py-1 text-sm font-medium bg-secondary rounded-full text-secondary-foreground"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </section>
   );
