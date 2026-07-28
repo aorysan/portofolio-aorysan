@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import SkipLink from "@/components/SkipLink";
 import LoadingScreen from "@/components/LoadingScreen";
+import SmoothScroll from "@/components/SmoothScroll";
 import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
@@ -14,16 +15,18 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <TooltipProvider>
-        <SkipLink />
-        <LoadingScreen />
-        <Toaster />
-        <Sonner />
-        <HashRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="*" element={<Index />} />
-          </Routes>
-        </HashRouter>
+        <SmoothScroll>
+          <SkipLink />
+          <LoadingScreen />
+          <Toaster />
+          <Sonner />
+          <HashRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="*" element={<Index />} />
+            </Routes>
+          </HashRouter>
+        </SmoothScroll>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
