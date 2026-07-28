@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Github, Linkedin } from 'lucide-react';
+import { Menu, X, Github, Linkedin, Volume2, VolumeX } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useActiveSection } from '@/hooks/useScrollAnimation';
 import { SECTION_IDS, NAV_ITEMS, GITHUB_URL, LINKEDIN_URL } from '@/lib/constants';
@@ -8,7 +8,14 @@ const PortfolioNav = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
   const activeSection = useActiveSection([...SECTION_IDS]);
+
+  const toggleMute = () => {
+    const newValue = !isMuted;
+    setIsMuted(newValue);
+    window.dispatchEvent(new CustomEvent('toggle-mute', { detail: { isMuted: newValue } }));
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -118,11 +125,25 @@ const PortfolioNav = () => {
                 >
                   <Linkedin className="w-4 h-4" />
                 </a>
+                <button
+                  onClick={toggleMute}
+                  className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Toggle Audio"
+                >
+                  {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                </button>
                 <ThemeToggle />
               </div>
             </div>
 
             <div className="flex items-center gap-2 md:hidden">
+              <button
+                onClick={toggleMute}
+                className="p-2 text-foreground"
+                aria-label="Toggle Audio"
+              >
+                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+              </button>
               <ThemeToggle />
               <button
                 onClick={() => setIsOpen(!isOpen)}

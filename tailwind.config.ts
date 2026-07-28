@@ -122,6 +122,10 @@ export default {
           "0%, 100%": { opacity: "0.15" },
           "50%": { opacity: "0.3" },
         },
+        marquee: {
+          '0%': { transform: 'translateX(-50%)' },
+          '100%': { transform: 'translateX(0%)' },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -137,6 +141,7 @@ export default {
         "gradient-shift": "gradient-shift 8s ease infinite",
         "section-reveal": "section-reveal 0.8s ease-out forwards",
         "number-glow": "number-glow 3s ease-in-out infinite",
+        marquee: "marquee 4s linear infinite",
       },
     },
   },

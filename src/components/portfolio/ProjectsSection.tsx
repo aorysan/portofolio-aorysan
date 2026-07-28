@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ExternalLink, Github, Folder, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GITHUB_URL } from '@/lib/constants';
 import type { Project } from '@/lib/constants';
-import useEmblaCarousel from 'embla-carousel-react';
-import Autoplay from 'embla-carousel-autoplay';
+// Removed ReactPlayer import since native iframe works more reliably here
 
 
 const projects: Project[] = [
@@ -84,103 +83,112 @@ const ProjectImage = ({ src, label }: { src?: string; label: string }) => {
 };
 
 const ProjectsSection = () => {
-  const [emblaRef] = useEmblaCarousel({ loop: true, align: 'center' }, [Autoplay({ delay: 4000, stopOnInteraction: false })]);
-  const [isMuted, setIsMuted] = useState(true); // Must start muted for autoplay to work
+  const [isMuted, setIsMuted] = useState(false); // Default unmuted (may be blocked by browser autoplay policy)
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    const handleToggleMute = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setIsMuted(customEvent.detail.isMuted);
+    };
+    window.addEventListener('toggle-mute', handleToggleMute);
+    return () => window.removeEventListener('toggle-mute', handleToggleMute);
+  }, []);
+
+  useEffect(() => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      const message = JSON.stringify({
+        event: 'command',
+        func: isMuted ? 'mute' : 'unMute',
+        args: []
+      });
+      iframeRef.current.contentWindow.postMessage(message, '*');
+    }
+  }, [isMuted]);
 
   return (
-    <section id="projects" className="h-screen relative overflow-hidden flex items-center bg-black">
+    <section id="projects" className="h-screen relative overflow-hidden flex flex-col justify-center bg-black">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
         <iframe
+          ref={iframeRef}
           className="absolute top-1/2 left-1/2 w-[100vw] h-[100vh] min-w-[177.77vh] min-h-[56.25vw] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-          src={`https://www.youtube.com/embed/IYF4hg9-e8A?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=IYF4hg9-e8A&controls=0&showinfo=0&rel=0&modestbranding=1`}
+          src="https://www.youtube.com/embed/IYF4hg9-e8A?autoplay=1&mute=0&loop=1&playlist=IYF4hg9-e8A&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1"
           allow="autoplay; encrypted-media"
           frameBorder="0"
-        ></iframe>
+        />
         {/* Overlay for better readability */}
         <div className="absolute inset-0 bg-black/50" />
       </div>
 
-      <div className="absolute top-10 left-10 z-50">
-        <div className="section-number opacity-20">03</div>
-        <span className="inline-block px-4 py-2 rounded-full bg-primary/20 text-primary-foreground backdrop-blur-md text-sm font-medium mb-2 border border-primary/50">
+      <div className="absolute top-10 left-6 md:top-16 md:left-16 z-30">
+        <div className="absolute -top-16 -left-4 text-9xl font-bold text-white/[0.03] z-[-1] select-none pointer-events-none tracking-tighter">03</div>
+        <span className="inline-block px-5 py-2 rounded-full bg-primary/10 text-white backdrop-blur-md text-sm font-medium mb-4 border border-primary/40 shadow-[0_0_15px_rgba(var(--primary),0.2)]">
           Projects
         </span>
-        <h2 className="font-display text-3xl md:text-4xl font-bold text-white">
+        <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight">
           Passing <span className="text-primary">By</span>
         </h2>
       </div>
 
-      {/* Audio Toggle Button */}
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => setIsMuted(!isMuted)}
-        className="absolute top-10 right-10 z-50 bg-black/50 border-primary/50 text-white hover:bg-black/80"
-      >
-        {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-      </Button>
+      {/* Audio Toggle Button moved to Top Navbar */}
 
       {/* Carousel */}
-      <div className="w-full relative z-10">
-        <div className="overflow-hidden w-full" ref={emblaRef}>
-          <div className="flex">
-            {projects.map((project, index) => (
-              <div
-                key={project.title}
-                className="flex-[0_0_85%] md:flex-[0_0_600px] min-w-0 pl-6"
-              >
-                <div className="project-card group bg-card/80 backdrop-blur-md border border-border/50 shadow-2xl rounded-2xl overflow-hidden h-full">
-                  <ProjectImage src={project.img} label={project.imageLabel} />
+      <div className="w-full relative z-10 overflow-hidden -mt-24 md:-mt-48">
+        <div className="flex w-max animate-marquee hover:[animation-play-state:paused]">
+          {[...projects, ...projects].map((project, index) => (
+            <div
+              key={`${project.title}-${index}`}
+              className="flex-[0_0_250px] min-w-0 pl-[72px]"
+            >
+              <div className="project-card group relative bg-card/80 backdrop-blur-md border border-border/50 shadow-2xl rounded-2xl overflow-hidden h-full flex flex-col">
+                <ProjectImage src={project.img} label={project.imageLabel} />
 
-                  <div className="p-6 relative z-10">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-display font-semibold text-2xl group-hover:text-primary transition-colors text-foreground">
-                        {project.title}
-                      </h3>
-                      <div className="flex items-center gap-3">
-                        {project.github && (
-                          <a
-                            href={project.github}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 text-muted-foreground hover:text-foreground transition-colors bg-secondary/50 rounded-full"
-                          >
-                            <Github className="w-5 h-5" />
-                          </a>
-                        )}
-                        {(project.website || project.itchio) && (
-                          <a
-                            href={project.website ?? project.itchio}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 text-muted-foreground hover:text-foreground transition-colors bg-secondary/50 rounded-full"
-                          >
-                            <ExternalLink className="w-5 h-5" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-
-                    <p className="text-muted-foreground text-base mb-6 line-clamp-3">
-                      {project.description}
-                    </p>
-
-                    <div className="flex flex-wrap gap-2">
-                      {project.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-3 py-1 text-sm font-medium bg-secondary rounded-full text-secondary-foreground"
+                <div className="p-4 relative z-10 flex flex-col flex-grow">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-display font-semibold text-lg group-hover:text-primary transition-colors text-foreground line-clamp-1">
+                      {project.title}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      {(project.website || project.itchio) && (
+                        <a
+                          href={project.website ?? project.itchio}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 text-muted-foreground hover:text-foreground transition-colors bg-secondary/50 rounded-full z-20"
                         >
-                          {tag}
-                        </span>
-                      ))}
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
                     </div>
                   </div>
+
+                  <div className="flex flex-wrap gap-1.5 mt-auto">
+                    {project.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-0.5 text-xs font-medium bg-secondary rounded-full text-secondary-foreground"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Hover Repository Link Overlay */}
+                {project.github && (
+                  <div className="absolute inset-0 bg-background/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-30">
+                    <Button asChild variant="default" className="gap-2 shadow-lg">
+                      <a href={project.github} target="_blank" rel="noopener noreferrer">
+                        <Github className="w-4 h-4" />
+                        View Repository
+                      </a>
+                    </Button>
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
