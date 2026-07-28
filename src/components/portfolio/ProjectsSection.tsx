@@ -1,12 +1,11 @@
-import { useRef } from 'react';
-import { ExternalLink, Github, Folder } from 'lucide-react';
+import { useState } from 'react';
+import { ExternalLink, Github, Folder, Volume2, VolumeX } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { GITHUB_URL } from '@/lib/constants';
 import type { Project } from '@/lib/constants';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useGSAP } from '@gsap/react';
-
-gsap.registerPlugin(ScrollTrigger);
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
+import ReactPlayer from 'react-player/youtube';
 
 const projects: Project[] = [
   {
@@ -85,101 +84,112 @@ const ProjectImage = ({ src, label }: { src?: string; label: string }) => {
 };
 
 const ProjectsSection = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  
-  useGSAP(() => {
-    if (!containerRef.current || !trackRef.current) return;
-    
-    // Calculate how far to scroll the track horizontally
-    const getScrollAmount = () => {
-      const trackWidth = trackRef.current?.scrollWidth || 0;
-      return -(trackWidth - window.innerWidth + window.innerWidth * 0.1); // Keep a bit of padding at the end
-    };
-
-    const tween = gsap.to(trackRef.current, {
-      x: getScrollAmount,
-      ease: "none",
-    });
-
-    ScrollTrigger.create({
-      trigger: containerRef.current,
-      start: "top top",
-      end: () => `+=${getScrollAmount() * -1}`,
-      pin: true,
-      animation: tween,
-      scrub: 1,
-      invalidateOnRefresh: true,
-    });
-
-  }, { scope: containerRef });
+  const [emblaRef] = useEmblaCarousel({ loop: true, align: 'center' }, [Autoplay({ delay: 4000, stopOnInteraction: false })]);
+  const [isMuted, setIsMuted] = useState(false);
 
   return (
-    <section id="projects" ref={containerRef} className="h-screen bg-card relative overflow-hidden flex items-center">
+    <section id="projects" className="h-screen relative overflow-hidden flex items-center bg-black">
+      {/* Background Video */}
+      <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
+        <ReactPlayer
+          url="https://youtu.be/IYF4hg9-e8A?si=PGs1ur77kMuf982d"
+          playing={true}
+          loop={true}
+          muted={isMuted}
+          width="100%"
+          height="200%"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[1.5] md:scale-[1.2]"
+          config={{
+            youtube: {
+              playerVars: { controls: 0, showinfo: 0, rel: 0, autoplay: 1 }
+            }
+          }}
+        />
+        {/* Overlay for better readability */}
+        <div className="absolute inset-0 bg-black/50" />
+      </div>
+
       <div className="absolute top-10 left-10 z-50">
         <div className="section-number opacity-20">03</div>
-        <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-2">
+        <span className="inline-block px-4 py-2 rounded-full bg-primary/20 text-primary-foreground backdrop-blur-md text-sm font-medium mb-2 border border-primary/50">
           Projects
         </span>
-        <h2 className="font-display text-3xl md:text-4xl font-bold">
-          Passing <span className="gradient-text">By</span>
+        <h2 className="font-display text-3xl md:text-4xl font-bold text-white">
+          Passing <span className="text-primary">By</span>
         </h2>
       </div>
 
-      <div ref={trackRef} className="flex gap-16 px-[10vw] items-center w-max h-full">
-        {projects.map((project, index) => (
-          <div
-            key={project.title}
-            className="w-[80vw] md:w-[600px] shrink-0 project-card group bg-card border border-border/50 shadow-2xl rounded-2xl overflow-hidden"
-          >
-            <ProjectImage src={project.img} label={project.imageLabel} />
+      {/* Audio Toggle Button */}
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => setIsMuted(!isMuted)}
+        className="absolute top-10 right-10 z-50 bg-black/50 border-primary/50 text-white hover:bg-black/80"
+      >
+        {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+      </Button>
 
-            <div className="p-6 relative z-10">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-display font-semibold text-2xl group-hover:text-primary transition-colors">
-                  {project.title}
-                </h3>
-                <div className="flex items-center gap-3">
-                  {project.github && (
-                    <a
-                      href={project.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 text-muted-foreground hover:text-foreground transition-colors bg-secondary/50 rounded-full"
-                    >
-                      <Github className="w-5 h-5" />
-                    </a>
-                  )}
-                  {(project.website || project.itchio) && (
-                    <a
-                      href={project.website ?? project.itchio}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 text-muted-foreground hover:text-foreground transition-colors bg-secondary/50 rounded-full"
-                    >
-                      <ExternalLink className="w-5 h-5" />
-                    </a>
-                  )}
+      {/* Carousel */}
+      <div className="w-full relative z-10">
+        <div className="overflow-hidden w-full" ref={emblaRef}>
+          <div className="flex">
+            {projects.map((project, index) => (
+              <div
+                key={project.title}
+                className="flex-[0_0_85%] md:flex-[0_0_600px] min-w-0 pl-6"
+              >
+                <div className="project-card group bg-card/80 backdrop-blur-md border border-border/50 shadow-2xl rounded-2xl overflow-hidden h-full">
+                  <ProjectImage src={project.img} label={project.imageLabel} />
+
+                  <div className="p-6 relative z-10">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-display font-semibold text-2xl group-hover:text-primary transition-colors text-foreground">
+                        {project.title}
+                      </h3>
+                      <div className="flex items-center gap-3">
+                        {project.github && (
+                          <a
+                            href={project.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 text-muted-foreground hover:text-foreground transition-colors bg-secondary/50 rounded-full"
+                          >
+                            <Github className="w-5 h-5" />
+                          </a>
+                        )}
+                        {(project.website || project.itchio) && (
+                          <a
+                            href={project.website ?? project.itchio}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 text-muted-foreground hover:text-foreground transition-colors bg-secondary/50 rounded-full"
+                          >
+                            <ExternalLink className="w-5 h-5" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-muted-foreground text-base mb-6 line-clamp-3">
+                      {project.description}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2">
+                      {project.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-3 py-1 text-sm font-medium bg-secondary rounded-full text-secondary-foreground"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <p className="text-muted-foreground text-base mb-6 line-clamp-3">
-                {project.description}
-              </p>
-
-              <div className="flex flex-wrap gap-2">
-                {project.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-3 py-1 text-sm font-medium bg-secondary rounded-full text-secondary-foreground"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </section>
   );
