@@ -26,3 +26,4 @@ dist-ssr
 # Worktrees and Agent artifacts
 .worktrees/
 .superpowers/
+
