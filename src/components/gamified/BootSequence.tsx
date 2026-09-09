@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useTypewriter } from '@/hooks/useTypewriter';
 import { useSoundEffect } from '@/hooks/useSoundEffect';
 import { PILOT_DOSSIER } from '@/lib/constants';
@@ -21,24 +21,32 @@ const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
   const { play: playTypeSound } = useSoundEffect('BOOT_TYPE');
   const { play: playDoneSound } = useSoundEffect('BOOT_COMPLETE');
   const [progress, setProgress] = useState(0);
+  const completedRef = useRef(false);
 
   const handleDone = () => {
+    if (completedRef.current) return;
+    completedRef.current = true;
     playDoneSound();
     onComplete();
   };
 
-  const { displayedLines, skip } = useTypewriter(BOOT_LOGS, 25, 200, handleDone);
+  const { displayedLines, isFinished, skip } = useTypewriter(BOOT_LOGS, 25, 200, handleDone);
 
   useEffect(() => {
     if (displayedLines.length > 0) {
-      playTypeSound();
+      if (!completedRef.current && !isFinished) {
+        playTypeSound();
+      }
       setProgress(Math.round((displayedLines.length / BOOT_LOGS.length) * 100));
     }
-  }, [displayedLines.length, playTypeSound]);
+  }, [displayedLines.length, isFinished, playTypeSound]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+        if (e.key === ' ') {
+          e.preventDefault();
+        }
         skip();
       }
     };
