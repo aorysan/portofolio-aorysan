@@ -2,6 +2,7 @@ import React from 'react';
 
 export interface ChamferedPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   as?: 'div' | 'button' | 'section' | React.ElementType;
+  type?: 'button' | 'submit' | 'reset';
   size?: 'sm' | 'md';
   glow?: 'green' | 'cyan' | 'magenta' | 'gold' | 'none';
   borderVariant?: 'default' | 'highlight' | 'none';
@@ -10,6 +11,7 @@ export interface ChamferedPanelProps extends React.HTMLAttributes<HTMLDivElement
 
 const ChamferedPanel: React.FC<ChamferedPanelProps> = ({
   as: Component = 'div',
+  type,
   size = 'md',
   glow = 'none',
   borderVariant = 'default',
@@ -28,6 +30,7 @@ const ChamferedPanel: React.FC<ChamferedPanelProps> = ({
 
   return (
     <Component
+      type={type}
       className={`bg-[#12121A] text-[#E0E0E0] ${chamferClass} ${borderClass} ${glowClass} ${className}`}
       {...(props as React.HTMLAttributes<HTMLElement>)}
     >

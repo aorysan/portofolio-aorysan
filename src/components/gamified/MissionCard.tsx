@@ -64,28 +64,30 @@ const MissionCard: React.FC<MissionCardProps> = ({ mission }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 pt-4 mt-4 border-t border-[#2A2A3A]">
-        {mission.repoLink && (
-          <a
-            href={mission.repoLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-mono text-[#00D4FF] border border-[#00D4FF]/40 hover:border-[#00D4FF] hover:bg-[#00D4FF]/10 chamfer-sm transition-colors"
-          >
-            <Github className="w-3.5 h-3.5" /> REPO
-          </a>
-        )}
-        {mission.liveLink && (
-          <a
-            href={mission.liveLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-mono text-[#00FF88] border border-[#00FF88]/40 hover:border-[#00FF88] hover:bg-[#00FF88]/10 chamfer-sm transition-colors"
-          >
-            <ExternalLink className="w-3.5 h-3.5" /> DEPLOY
-          </a>
-        )}
-      </div>
+      {(mission.repoLink || mission.liveLink) && (
+        <div className="flex items-center gap-3 pt-4 mt-4 border-t border-[#2A2A3A]">
+          {mission.repoLink && (
+            <a
+              href={mission.repoLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-mono text-[#00D4FF] border border-[#00D4FF]/40 hover:border-[#00D4FF] hover:bg-[#00D4FF]/10 chamfer-sm transition-colors"
+            >
+              <Github className="w-3.5 h-3.5" /> REPO
+            </a>
+          )}
+          {mission.liveLink && (
+            <a
+              href={mission.liveLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-mono text-[#00FF88] border border-[#00FF88]/40 hover:border-[#00FF88] hover:bg-[#00FF88]/10 chamfer-sm transition-colors"
+            >
+              <ExternalLink className="w-3.5 h-3.5" /> DEPLOY
+            </a>
+          )}
+        </div>
+      )}
     </ChamferedPanel>
   );
 };

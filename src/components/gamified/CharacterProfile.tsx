@@ -2,18 +2,11 @@ import React from 'react';
 import { ArrowLeft, User, MapPin, Activity } from 'lucide-react';
 import ChamferedPanel from '@/components/gamified/ChamferedPanel';
 import StatBar from '@/components/gamified/StatBar';
-import { PILOT_DOSSIER, APTITUDES, SERVICE_RECORDS } from '@/lib/constants';
+import { PILOT_DOSSIER, APTITUDES, SERVICE_RECORDS, DEPLOYMENT_LOGS } from '@/lib/constants';
 
 interface CharacterProfileProps {
   onClose: () => void;
 }
-
-const DEPLOYMENT_LOGS = [
-  { period: '2022', title: 'Tactical Foundations', desc: 'Began software engineering with HTML, CSS, and modern JavaScript.' },
-  { period: '2023', title: 'First Operations', desc: 'Built first full-stack platforms and participated in game development jams.' },
-  { period: '2024', title: 'Skill Expansion', desc: 'Mastered production React, TypeScript, and distributed cloud workflows.' },
-  { period: 'ACTIVE', title: 'Combat Ready', desc: 'Continuously shipping high-reliability web systems.' },
-];
 
 const CharacterProfile: React.FC<CharacterProfileProps> = ({ onClose }) => {
   return (

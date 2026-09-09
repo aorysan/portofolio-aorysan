@@ -73,4 +73,25 @@ describe('MissionLog Component', () => {
     expect(screen.getByText(missionWithoutThumb.imageLabel)).toBeInTheDocument();
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
+
+  it('should not render link footer if mission has neither repoLink nor liveLink', () => {
+    const missionNoLinks = {
+      id: 'mission-classified',
+      title: 'Classified Operation',
+      briefing: 'Black ops reconnaissance without public repository or deployment link.',
+      status: 'COMPLETED' as const,
+      difficulty: 5 as const,
+      rewards: ['OpSec'],
+      imageLabel: 'classified.png',
+    };
+    const { container } = render(
+      <SoundProvider>
+        <MissionCard mission={missionNoLinks} />
+      </SoundProvider>
+    );
+
+    expect(screen.queryByRole('link', { name: /REPO/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /DEPLOY/i })).not.toBeInTheDocument();
+    expect(container.querySelector('.border-t.border-\\[\\#2A2A3A\\]')).not.toBeInTheDocument();
+  });
 });

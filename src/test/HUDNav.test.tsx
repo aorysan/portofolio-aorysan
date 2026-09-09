@@ -39,13 +39,16 @@ describe('HUDNav Component', () => {
     expect(screen.getByRole('button', { name: /toggle audio/i })).toBeInTheDocument();
   });
 
-  it('should render network status indicator and SYS_TIME clock', () => {
-    render(
+  it('should render network status indicator with sharp tactical dot and SYS_TIME clock', () => {
+    const { container } = render(
       <SoundProvider>
         <HUDNav activePanel={null} onSelectPanel={vi.fn()} />
       </SoundProvider>
     );
     expect(screen.getByText('NET_ONLINE')).toBeInTheDocument();
     expect(screen.getByText(/SYS_TIME:/i)).toBeInTheDocument();
+    const dot = container.querySelector('.bg-\\[\\#00FF88\\]');
+    expect(dot).toBeInTheDocument();
+    expect(dot).not.toHaveClass('rounded-full');
   });
 });

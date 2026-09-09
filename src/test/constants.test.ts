@@ -5,6 +5,7 @@ import {
   TECH_ARSENAL,
   APTITUDES,
   SERVICE_RECORDS,
+  DEPLOYMENT_LOGS,
 } from '../lib/constants';
 
 describe('Gamified Constants', () => {
@@ -33,5 +34,12 @@ describe('Gamified Constants', () => {
     expect(APTITUDES.length).toBe(4);
     expect(APTITUDES[0].color).toBe('#00D4FF');
     expect(APTITUDES[1].color).toBe('#FF00FF');
+  });
+
+  it('should define DEPLOYMENT_LOGS adhering to stop-slop rules', () => {
+    expect(DEPLOYMENT_LOGS.length).toBe(4);
+    const activeLog = DEPLOYMENT_LOGS.find((l) => l.period === 'ACTIVE');
+    expect(activeLog).toBeDefined();
+    expect(activeLog?.desc).toBe('Active deployment of high-reliability web systems.');
   });
 });

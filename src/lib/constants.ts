@@ -155,6 +155,19 @@ export const SERVICE_RECORDS = [
   { value: '100%', label: 'Mission Reliability' },
 ] as const;
 
+export interface DeploymentLog {
+  period: string;
+  title: string;
+  desc: string;
+}
+
+export const DEPLOYMENT_LOGS: DeploymentLog[] = [
+  { period: '2022', title: 'Tactical Foundations', desc: 'Began software engineering with HTML, CSS, and modern JavaScript.' },
+  { period: '2023', title: 'First Operations', desc: 'Built first full-stack platforms and participated in game development jams.' },
+  { period: '2024', title: 'Skill Expansion', desc: 'Mastered production React, TypeScript, and distributed cloud workflows.' },
+  { period: 'ACTIVE', title: 'Combat Ready', desc: 'Active deployment of high-reliability web systems.' },
+];
+
 export const MISSIONS_DATA: Mission[] = [
   {
     id: 'mission-kampungku',

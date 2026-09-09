@@ -42,7 +42,7 @@ const HUDNav: React.FC<HUDNavProps> = ({ activePanel, onSelectPanel }) => {
 
       <div className="hidden sm:flex items-center gap-6 text-xs font-mono text-[#94A3B8]">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#00FF88]" />
+          <span className="w-2 h-2 bg-[#00FF88]" />
           <span>NET_ONLINE</span>
         </div>
         <div>SYS_TIME: {time}</div>

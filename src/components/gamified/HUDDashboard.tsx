@@ -37,7 +37,7 @@ const HUDDashboard: React.FC = () => {
     <div className="min-h-screen bg-[#0A0A0F] text-[#E0E0E0] pt-20 pb-12 px-6 sm:px-12 flex flex-col justify-between relative z-10">
       <HUDNav activePanel={activePanel} onSelectPanel={openPanel} />
 
-      <main className="w-full max-w-6xl mx-auto my-auto py-8">
+      <main id="main-content" className="w-full max-w-6xl mx-auto my-auto py-8">
         {activePanel === null ? (
           <div className="space-y-12">
             {/* Center Welcome Transmission */}
@@ -60,6 +60,7 @@ const HUDDashboard: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <ChamferedPanel
                 as="button"
+                type="button"
                 size="md"
                 onMouseEnter={playHover}
                 onClick={() => openPanel('profile')}
@@ -78,6 +79,7 @@ const HUDDashboard: React.FC = () => {
 
               <ChamferedPanel
                 as="button"
+                type="button"
                 size="md"
                 onMouseEnter={playHover}
                 onClick={() => openPanel('missions')}
@@ -96,6 +98,7 @@ const HUDDashboard: React.FC = () => {
 
               <ChamferedPanel
                 as="button"
+                type="button"
                 size="md"
                 onMouseEnter={playHover}
                 onClick={() => openPanel('arsenal')}
@@ -114,6 +117,7 @@ const HUDDashboard: React.FC = () => {
 
               <ChamferedPanel
                 as="button"
+                type="button"
                 size="md"
                 onMouseEnter={playHover}
                 onClick={() => openPanel('comms')}
@@ -143,7 +147,7 @@ const HUDDashboard: React.FC = () => {
 
       <footer className="w-full max-w-6xl mx-auto pt-8 border-t border-[#2A2A3A] flex flex-col sm:flex-row justify-between items-center text-xs font-mono text-[#94A3B8] gap-2">
         <span>VALKYRIE TERMINAL // ALL SYSTEMS OPERATIONAL</span>
-        <span>© {new Date().getFullYear()} ARYO ADI PUTRO</span>
+        <span>{"\u00A9"} {new Date().getFullYear()} ARYO ADI PUTRO</span>
       </footer>
     </div>
   );
