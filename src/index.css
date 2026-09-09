@@ -75,7 +75,9 @@
   }
 
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl;
+    @apply backdrop-blur-xl border rounded-2xl;
+    background-color: color-mix(in srgb, var(--card) 80%, transparent);
+    border-color: color-mix(in srgb, var(--border) 50%, transparent);
   }
 
   .skill-badge {
@@ -163,7 +165,9 @@
 
   /* Enhanced glass */
   .glass-card-enhanced {
-    @apply bg-card/70 backdrop-blur-xl border border-border/40 rounded-2xl shadow-lg;
+    @apply backdrop-blur-xl border rounded-2xl shadow-lg;
+    background-color: color-mix(in srgb, var(--card) 70%, transparent);
+    border-color: color-mix(in srgb, var(--border) 40%, transparent);
     box-shadow: var(--shadow-md);
   }
 
@@ -219,7 +223,8 @@
 
   /* Project card glow */
   .project-card {
-    @apply relative bg-card rounded-2xl border border-border/50 overflow-hidden transition-all duration-500;
+    @apply relative bg-card rounded-2xl border overflow-hidden transition-all duration-500;
+    border-color: color-mix(in srgb, var(--border) 50%, transparent);
   }
 
   .project-card::before {
