@@ -1,24 +1,23 @@
-import PortfolioNav from '@/components/portfolio/PortfolioNav';
-import HeroSection from '@/components/portfolio/HeroSection';
-import AboutSection from '@/components/portfolio/AboutSection';
-import ProjectsSection from '@/components/portfolio/ProjectsSection';
-import TechStackSection from '@/components/portfolio/TechStackSection';
-import ContactSection from '@/components/portfolio/ContactSection';
-import PortfolioFooter from '@/components/portfolio/PortfolioFooter';
+import React, { useState } from 'react';
+import { SoundProvider } from '@/components/gamified/SoundManager';
+import GridBackground from '@/components/gamified/GridBackground';
+import BootSequence from '@/components/gamified/BootSequence';
+import HUDDashboard from '@/components/gamified/HUDDashboard';
 
-const Index = () => {
+const Index: React.FC = () => {
+  const [bootCompleted, setBootCompleted] = useState(false);
+
   return (
-    <div className="min-h-screen bg-background">
-      <PortfolioNav />
-      <main id="main-content">
-        <HeroSection />
-        <AboutSection />
-        <ProjectsSection />
-        <TechStackSection />
-        <ContactSection />
-      </main>
-      <PortfolioFooter />
-    </div>
+    <SoundProvider>
+      <div className="relative min-h-screen bg-[#0A0A0F] text-[#E0E0E0] overflow-x-hidden selection:bg-[#00FF88] selection:text-[#0A0A0F]">
+        <GridBackground />
+        {!bootCompleted ? (
+          <BootSequence onComplete={() => setBootCompleted(true)} />
+        ) : (
+          <HUDDashboard />
+        )}
+      </div>
+    </SoundProvider>
   );
 };
 

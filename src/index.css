@@ -1,89 +1,46 @@
+@import './styles/gamified.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Portfolio Design System - Modern, Clean, Professional */
-
 @layer base {
   :root {
-    --background: 43 50% 90%; /* #F4ECD8 */
-    --foreground: 0 0% 10%; /* #1A1A1A */
+    --void: #0A0A0F;
+    --card: #12121A;
+    --muted-bg: #1C1C2E;
+    --border: #2A2A3A;
+    --green: #00FF88;
+    --cyan: #00D4FF;
+    --magenta: #FF00FF;
+    --gold: #FFD700;
+    --destructive: #FF3366;
+    --text: #E0E0E0;
+    --text-muted: #94A3B8;
+    --text-dim: #6B7280;
 
-    --card: 43 40% 85%;
-    --card-foreground: 0 0% 10%;
-
-    --popover: 43 40% 85%;
-    --popover-foreground: 0 0% 10%;
-
-    --primary: 0 96% 27%; /* #8A0303 */
-    --primary-foreground: 43 50% 90%;
-
-    --secondary: 22 28% 28%; /* #5C4033 */
-    --secondary-foreground: 43 50% 90%;
-
-    --muted: 43 20% 80%;
-    --muted-foreground: 22 20% 40%;
-
-    --accent: 0 96% 27%;
-    --accent-foreground: 43 50% 90%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 22 28% 28%;
-    --input: 22 28% 28%;
-    --ring: 0 96% 27%;
-
-    --radius: 0.5rem;
-    
-    --gradient-primary: linear-gradient(135deg, hsl(0 96% 27%) 0%, hsl(22 28% 28%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(22 28% 28%) 0%, hsl(0 96% 27%) 100%);
-    --gradient-dark: linear-gradient(135deg, hsl(0 0% 10%) 0%, hsl(22 28% 28%) 100%);
-    
-    --shadow-sm: 0 2px 8px -2px hsl(0 0% 10% / 0.15);
-    --shadow-md: 0 8px 24px -4px hsl(0 0% 10% / 0.2);
-    --shadow-lg: 0 16px 48px -8px hsl(0 0% 10% / 0.3);
-    --shadow-glow: 0 0 40px hsl(0 96% 27% / 0.3);
+    --background: 240 20% 5%;
+    --foreground: 0 0% 88%;
+    --card-foreground: 0 0% 88%;
+    --primary: 152 100% 50%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 191 100% 50%;
+    --secondary-foreground: 240 20% 5%;
+    --accent: 300 100% 50%;
+    --accent-foreground: 0 0% 100%;
+    --muted: 240 24% 15%;
+    --muted-foreground: 215 20% 65%;
   }
 
-  .dark {
-    --background: 0 0% 8%; /* Very dark, almost black */
-    --foreground: 43 40% 85%; /* Sepia text */
-
-    --card: 0 0% 12%;
-    --card-foreground: 43 40% 85%;
-
-    --popover: 0 0% 12%;
-    --popover-foreground: 43 40% 85%;
-
-    --primary: 0 96% 27%; /* Blood Crimson */
-    --primary-foreground: 43 50% 90%;
-
-    --secondary: 22 28% 28%; /* Leather Brown */
-    --secondary-foreground: 43 50% 90%;
-
-    --muted: 0 0% 16%;
-    --muted-foreground: 43 20% 60%;
-
-    --accent: 0 96% 27%;
-    --accent-foreground: 43 50% 90%;
-
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 22 28% 28%;
-    --input: 22 28% 28%;
-    --ring: 0 96% 27%;
-  }
-}
-
-@layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    background-color: var(--void);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
   }
 
   html {
@@ -118,7 +75,9 @@
   }
 
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl;
+    @apply backdrop-blur-xl border rounded-2xl;
+    background-color: color-mix(in srgb, var(--card) 80%, transparent);
+    border-color: color-mix(in srgb, var(--border) 50%, transparent);
   }
 
   .skill-badge {
@@ -206,7 +165,9 @@
 
   /* Enhanced glass */
   .glass-card-enhanced {
-    @apply bg-card/70 backdrop-blur-xl border border-border/40 rounded-2xl shadow-lg;
+    @apply backdrop-blur-xl border rounded-2xl shadow-lg;
+    background-color: color-mix(in srgb, var(--card) 70%, transparent);
+    border-color: color-mix(in srgb, var(--border) 40%, transparent);
     box-shadow: var(--shadow-md);
   }
 
@@ -262,7 +223,8 @@
 
   /* Project card glow */
   .project-card {
-    @apply relative bg-card rounded-2xl border border-border/50 overflow-hidden transition-all duration-500;
+    @apply relative bg-card rounded-2xl border overflow-hidden transition-all duration-500;
+    border-color: color-mix(in srgb, var(--border) 50%, transparent);
   }
 
   .project-card::before {
