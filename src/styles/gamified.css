@@ -1,0 +1,61 @@
+/* Chamfer cut corners via clip-path */
+.chamfer {
+  clip-path: polygon(
+    12px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%,
+    0 12px
+  );
+}
+
+.chamfer-sm {
+  clip-path: polygon(
+    6px 0,
+    100% 0,
+    100% calc(100% - 6px),
+    calc(100% - 6px) 100%,
+    0 100%,
+    0 6px
+  );
+}
+
+/* Tactical Sub-pixel Grid */
+.void-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.024) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Glow Utilities */
+.glow-green {
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+}
+
+.glow-magenta {
+  box-shadow: 0 0 12px rgba(255, 0, 255, 0.25);
+}
+
+.glow-gold {
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+}
+
+/* Glitch text effect keyframes */
+@keyframes glitch-anim {
+  0% { transform: translate(0); clip-path: inset(0 0 0 0); }
+  20% { transform: translate(-2px, 1px); clip-path: inset(10% 0 30% 0); }
+  40% { transform: translate(2px, -1px); clip-path: inset(40% 0 10% 0); }
+  60% { transform: translate(-1px, 2px); clip-path: inset(20% 0 50% 0); }
+  80% { transform: translate(1px, -2px); clip-path: inset(60% 0 5% 0); }
+  100% { transform: translate(0); clip-path: inset(0 0 0 0); }
+}
+
+.animate-glitch {
+  animation: glitch-anim 0.3s ease infinite alternate;
+}
