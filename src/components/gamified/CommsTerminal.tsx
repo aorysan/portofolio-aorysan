@@ -18,7 +18,9 @@ const CommsTerminal: React.FC<CommsTerminalProps> = ({ onClose }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     playClick();
-    const mailtoLink = `mailto:${EMAIL}?subject=Transmission from ${callsign}&body=Frequency: ${frequency}%0D%0A%0D%0A${transmission}`;
+    const subject = encodeURIComponent(`Transmission from ${callsign}`);
+    const body = encodeURIComponent(`Frequency: ${frequency}\n\n${transmission}`);
+    const mailtoLink = `mailto:${EMAIL}?subject=${subject}&body=${body}`;
     window.location.href = mailtoLink;
     setSent(true);
   };
@@ -38,7 +40,7 @@ const CommsTerminal: React.FC<CommsTerminalProps> = ({ onClose }) => {
       <ChamferedPanel size="md" className="p-6 sm:p-8 space-y-6">
         <div className="space-y-1">
           <h2 className="font-display text-xl font-bold text-[#E0E0E0]">COMMS RELAY</h2>
-          <p className="font-mono text-xs text-[#00FF88]">&gt; CHANNEL OPEN — AWAITING TRANSMISSION</p>
+          <p className="font-mono text-xs text-[#00FF88]">&gt; CHANNEL OPEN // AWAITING TRANSMISSION</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 font-mono text-xs">

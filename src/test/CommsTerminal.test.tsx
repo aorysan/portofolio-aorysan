@@ -52,9 +52,10 @@ describe('CommsTerminal Component', () => {
     fireEvent.submit(form);
 
     expect(window.location.href).toContain(`mailto:${EMAIL}`);
-    expect(window.location.href).toContain('Observer');
-    expect(window.location.href).toContain('obs@domain.com');
-    expect(window.location.href).toContain('Briefing report.');
+    const decodedUrl = decodeURIComponent(window.location.href);
+    expect(decodedUrl).toContain('Observer');
+    expect(decodedUrl).toContain('obs@domain.com');
+    expect(decodedUrl).toContain('Briefing report.');
   });
 
   it('should render network nodes links', () => {
