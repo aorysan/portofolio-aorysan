@@ -2,9 +2,13 @@
 
 ## Overview
 
-Transform the existing portfolio (Vite + React + TypeScript + Tailwind + shadcn/ui) into a fully gamified, Honkai Impact 3–inspired sci-fi post-apocalyptic experience. The visitor enters through a boot sequence, lands on a HUD command-center dashboard, and interacts with portfolio content through game-themed panels: Character Profile, Mission Log, Equipment Inventory, and Comms Terminal.
+Transform the existing portfolio (Vite + React + TypeScript + Tailwind + shadcn/ui) into a fully gamified, Honkai Impact 3–inspired sci-fi military HUD experience. The visitor enters through a boot sequence, lands on a HUD command-center dashboard, and interacts with portfolio content through game-themed panels: Pilot Dossier, Operations Log, Tech Arsenal, and Comms Relay.
 
-**Core principle**: Gamified Shell + Keep Content. All existing data (projects, about info, tech stack, contact) is preserved. Only the UI layer and interaction patterns change.
+**Core principle**: Gamified Shell + Keep Content. All existing data (projects, about info, tech stack, contact) stays. Only the UI layer and interaction patterns change.
+
+### Visual Reference
+
+A visual guide (`visual_guide.md`) exists as a reference with mockup images and design tokens. It captures the design direction and CSS specifics. Treat it as guidance material during implementation. The implementation should match the spec's intent, using the visual guide for tone and reference, not as a pixel-perfect target.
 
 ## Tech Stack (unchanged)
 
@@ -13,7 +17,7 @@ Transform the existing portfolio (Vite + React + TypeScript + Tailwind + shadcn/
 - **Animation**: GSAP (already installed), CSS animations
 - **Audio**: Web Audio API (new — no extra dependency)
 - **Routing**: react-router-dom (HashRouter, already installed)
-- **Fonts**: Sora (headings), JetBrains Mono (terminal/code), Inter (body)
+- **Fonts**: Orbitron (headings — geometric, tactical), JetBrains Mono (terminal/data), Inter (body)
 
 No new heavy dependencies. Web Audio API is native. Sound assets are small royalty-free files hosted in `/public/audio/`.
 
@@ -21,22 +25,24 @@ No new heavy dependencies. Web Audio API is native. Sound assets are small royal
 
 ## Color Palette
 
+Three-accent Cyberpunk HUD system (from ui-ux-pro-max database):
+
 | Token               | Value       | Usage                              |
 |----------------------|-------------|-------------------------------------|
-| `--bg-deep`          | `#0a0a14`   | Main background                    |
-| `--bg-panel`         | `#0d1117`   | Card/panel backgrounds             |
-| `--bg-panel-hover`   | `#161b22`   | Panel hover state                  |
-| `--accent-cyan`      | `#00d4ff`   | Primary accent, borders, glows     |
-| `--accent-purple`    | `#7b2ffc`   | Secondary accent                   |
-| `--accent-orange`    | `#ff6b35`   | Warning, highlight, "hot" elements |
-| `--accent-gold`      | `#ffd700`   | Legendary rarity, special items    |
-| `--text-primary`     | `#e4e4e7`   | Main text                          |
-| `--text-muted`       | `#6b7280`   | Secondary text                     |
-| `--text-glow`        | `#00d4ff`   | Glowing text (headings, labels)    |
-| `--border-glow`      | `rgba(0,212,255,0.3)` | Subtle border glow         |
-| `--scanline`         | `rgba(0,212,255,0.03)` | Scanline overlay opacity  |
+| `--void`             | `#0A0A0F`   | Main background (deep void)        |
+| `--card`             | `#12121A`   | Card/panel surfaces                |
+| `--muted-bg`         | `#1C1C2E`   | Subtle bg differentiation          |
+| `--border`           | `#2A2A3A`   | Default borders, dividers          |
+| `--green`            | `#00FF88`   | Primary action, status, CTA        |
+| `--cyan`             | `#00D4FF`   | Info, links, secondary highlight   |
+| `--magenta`          | `#FF00FF`   | Tertiary, difficulty, stat bars    |
+| `--gold`             | `#FFD700`   | Legendary rarity only              |
+| `--destructive`      | `#FF3366`   | Errors, warnings                   |
+| `--text`             | `#E0E0E0`   | Primary text                       |
+| `--text-muted`       | `#94A3B8`   | Secondary text                     |
+| `--text-dim`         | `#6B7280`   | Tertiary/disabled text             |
 
-These map to Tailwind's existing CSS variable system. The current `--primary`, `--accent`, etc. tokens will be remapped to these values for dark theme.
+These map to Tailwind's existing CSS variable system. The current tokens will be remapped to these values. Theme is locked to dark.
 
 ---
 
@@ -57,10 +63,10 @@ src/
 │   │   ├── EquipmentInventory.tsx   # Tech stack → Inventory grid
 │   │   ├── EquipmentCard.tsx        # Single inventory item
 │   │   ├── CommsTerminal.tsx        # Contact → Terminal form
-│   │   ├── ScanlineOverlay.tsx      # Fullscreen scanline CSS effect
+│   │   ├── GridBackground.tsx       # Sub-pixel grid background overlay
 │   │   ├── GlitchText.tsx           # Reusable glitch text component
 │   │   ├── StatBar.tsx              # Reusable stat/progress bar
-│   │   ├── ParticleField.tsx        # Enhanced particle background
+│   │   ├── ChamferedPanel.tsx       # Reusable panel with clip-path chamfer
 │   │   └── SoundManager.tsx         # Audio context provider + controls
 │   ├── portfolio/                   # [KEEP] Existing files kept for data/reference
 │   └── ui/                          # [KEEP] shadcn/ui components
@@ -147,12 +153,13 @@ No new routes needed. The `HashRouter` with catch-all stays.
 └──────────────────────────────────────────┘
 ```
 
-**Panel cards**: Each panel is a glassmorphism card with:
-- Glow border (`box-shadow: 0 0 15px var(--accent-cyan)`)
-- Icon + label
-- Hover: border brightens, subtle scale(1.02), glow intensifies
-- Click: Opens corresponding section with GSAP slide-in animation
+**Panel cards**: Each panel uses chamfered corners via `clip-path` (not `border-radius`):
+- Dark `#12121A` fill, thin 1px `#2A2A3A` border
+- Lucide SVG icon (line-art, no emoji) + label in Orbitron
+- Hover: border shifts to `#00FF88`, controlled `box-shadow: 0 0 12px rgba(0,255,136,0.3)`, transition 200ms
+- Click: Opens corresponding section with GSAP slide-in
 - SFX on hover and click
+- No glass/blur decoration. No gradient text. No `scale()` on hover.
 
 **Mobile**: Panels stack vertically in a scrollable list. Same HUD aesthetic.
 
@@ -176,7 +183,7 @@ No new routes needed. The `HashRouter` with catch-all stays.
 **Layout**:
 ```
 ┌────────────────────────────────────────────┐
-│  [← Back]              CHARACTER PROFILE   │
+│  [← Back]               PILOT DOSSIER     │
 ├────────────────────────────────────────────┤
 │                                            │
 │  ┌─────────┐   Name: ARYO ADI PUTRO       │
@@ -185,29 +192,29 @@ No new routes needed. The `HashRouter` with catch-all stays.
 │  │         │   Status: AVAILABLE           │
 │  └─────────┘                               │
 │                                            │
-│  ── STATS ──────────────────────────────   │
-│  Clean Code      ████████░░  80%           │
-│  Problem Solving █████████░  90%           │
-│  Goal Oriented   ████████░░  80%           │
-│  Team Player     █████████░  90%           │
+│  ── APTITUDE ───────────────────────────   │
+│  Architecture    ████████░░  80%  (cyan)   │
+│  Problem Solving █████████░  90%  (magenta)│
+│  Systems Design  ████████░░  80%  (cyan)   │
+│  Collaboration   █████████░  90%  (magenta)│
 │                                            │
-│  ── COMBAT RECORD ──────────────────────   │
-│  2+ Years  │  3+ Projects  │  5+ Techs    │
+│  ── SERVICE RECORD ─────────────────────   │
+│  2+ Years  │  3+ Operations  │ 5+ Platforms│
 │                                            │
-│  ── MISSION HISTORY ────────────────────   │
+│  ── DEPLOYMENT LOG ─────────────────────   │
 │  2022 ● Started Learning                  │
 │  2023 ● First Projects                    │
 │  2024 ● Skill Expansion                   │
-│  Now  ● Ongoing Growth                    │
+│  Now  ● ACTIVE                            │
 └────────────────────────────────────────────┘
 ```
 
 **Data mapping**:
-- `highlights[]` → Stats with progress bars (StatBar component)
-- `stats[]` → "Combat Record" summary row
-- `journey[]` → "Mission History" timeline (keep existing data, restyle)
+- `highlights[]` → Aptitude bars (StatBar component). Bars alternate between `--cyan` and `--magenta`.
+- `stats[]` → "Service Record" summary boxes, chamfered.
+- `journey[]` → "Deployment Log" timeline (keep existing data, restyle)
 
-**StatBar.tsx**: Reusable component. Props: `label`, `value` (0-100), `color`. Renders an animated fill bar with glow effect. GSAP animates fill on mount.
+**StatBar.tsx**: Reusable component. Props: `label`, `value` (0-100), `color`. Renders a thin 4px bar, no rounded ends. GSAP animates `scaleX` from 0 on mount with `ease: 'expo.out'`.
 
 ### 5. MissionLog.tsx + MissionCard.tsx
 
@@ -238,12 +245,13 @@ interface MissionCardProps {
 - Jawara → 2 (web app)
 
 **Card design**:
-- Top: Thumbnail or placeholder with scanline overlay
-- Status badge: Glowing green `[COMPLETED]` or pulsing yellow `[IN PROGRESS]`
-- Difficulty: Star rating with glow
-- Rewards: Tag pills (same data as current tags)
-- Bottom: Action buttons (View Repo, Live Demo)
-- Hover: Card lifts, border glows brighter, SFX
+- Top: Thumbnail or geometric grid placeholder with crosshair icon
+- Status badge: `COMPLETE` in `#00FF88` monospace, top-right. No pulsing — static.
+- Difficulty: ◆ diamond shapes filled in `#FF00FF` (not stars)
+- Rewards: Chamfered rectangular badges, thin border, monospace text
+- Bottom: "ACCESS REPOSITORY" button — `#00D4FF` text, thin border, chamfered
+- Hover: border shifts to `#00FF88` with controlled glow. No `scale()` lift.
+- All corners chamfered via `clip-path`, not `border-radius`
 
 ### 6. EquipmentInventory.tsx + EquipmentCard.tsx
 
@@ -252,12 +260,12 @@ interface MissionCardProps {
 **Layout**: Tab bar for categories (Frontend, Backend, Tools) + item grid.
 
 **Rarity system** (mapped by proficiency):
-| Rarity     | Border Color  | Glow         | Criteria                |
-|------------|---------------|--------------|-------------------------|
-| Common     | `#6b7280`     | None         | Basic familiarity       |
-| Rare       | `#3b82f6`     | Blue subtle  | Regular use             |
-| Epic       | `#7b2ffc`     | Purple       | Strong proficiency      |
-| Legendary  | `#ffd700`     | Gold         | Core daily-use tech     |
+| Rarity     | Border Color  | Glow                                     | Criteria                |
+|------------|---------------|------------------------------------------|-------------------------|
+| Common     | `#2A2A3A`     | None                                     | Basic familiarity       |
+| Rare       | `#00D4FF`     | `0 0 12px rgba(0,212,255,0.3)`           | Regular use             |
+| Epic       | `#FF00FF`     | `0 0 12px rgba(255,0,255,0.25)`          | Strong proficiency      |
+| Legendary  | `#FFD700`     | `0 0 12px rgba(255,215,0,0.3)`           | Core daily-use tech     |
 
 **Rarity mapping** (added to constants):
 - React & Next.js → Legendary
@@ -274,32 +282,35 @@ interface MissionCardProps {
 - Unity → Rare
 
 **Card design**: 
-- Square card, dark bg
-- Rarity-colored border (subtle glow matching rarity)
-- Icon centered (Lucide icon or simple SVG)
-- Name below icon
-- Hover tooltip: Full name + category + brief description
+- Vertical rectangle, dark `#12121A` fill, chamfered corners
+- Rarity-colored thin 1px border with matching glow (border OR glow, not both heavy)
+- Icon centered (Lucide line-art SVG or tech icon — monochrome white)
+- Name below icon in Orbitron small
+- Rarity label below name in JetBrains Mono tiny
+- Hover tooltip: chamfered, dark bg, brief description text
+- Category tabs: text-only, active has `#00FF88` underline, no tab background
 
 ### 7. CommsTerminal.tsx
 
 **Replaces**: `ContactSection.tsx` (uses same form fields/data)
 
-**Design**: Terminal-style contact form
-- Header with typing effect: `> ESTABLISHING SECURE CHANNEL...`
-- Form fields styled as terminal inputs (monospace, cursor blink, cyan accent)
-- Labels as terminal prompts (`SENDER_NAME: `, `MESSAGE_BODY: `)
-- Submit button: `[TRANSMIT ▶]` with glow effect
-- Social links from existing footer data, styled as "network nodes"
+**Design**: Military comms panel (not generic terminal)
+- Title: "COMMS RELAY" in Orbitron, thin `#00FF88` underline
+- Subheader with typing effect: `> CHANNEL OPEN — AWAITING TRANSMISSION` in JetBrains Mono, `#00FF88`
+- Labels: `CALLSIGN`, `FREQUENCY`, `TRANSMISSION` — JetBrains Mono, `#00D4FF`, tracked
+- Input fields: `#12121A` bg, 1px bottom-border only (no outline, no rounded corners)
+- Submit button: `[ TRANSMIT ]` in Orbitron, `#00FF88` text, thin border, chamfered. Hover: `box-shadow: 0 4px 14px rgba(0,255,136,0.35)`
+- Social links: Line-art icons (GitHub, LinkedIn, Mail), `#94A3B8`, connected by thin lines. Labeled "NETWORK NODES"
 
-### 8. ScanlineOverlay.tsx
+### 8. GridBackground.tsx
 
-**Purpose**: Fullscreen CSS overlay that gives the whole page a subtle CRT/holographic feel.
+**Purpose**: Sub-pixel grid background that gives the page a tactical HUD feel. Replaces the scanline approach (per impeccable craft-floor: scanlines are decoration without function).
 
 **Implementation**: A `position: fixed` div with:
-- Repeating linear gradient (2px transparent, 1px rgba cyan) creating horizontal scan lines
+- Two-axis repeating linear gradient: `rgba(255,255,255,0.024)` 1px lines on 40px grid
 - `pointer-events: none`
-- Very low opacity (0.03-0.05)
-- Optional: slow vertical animation (translateY) for "scrolling scanline" effect
+- Static, no animation (no scrolling effect)
+- Inspired by QikSense's background grid technique
 
 ### 9. GlitchText.tsx
 
@@ -309,11 +320,11 @@ interface MissionCardProps {
 
 **Implementation**: CSS-only glitch using `::before` and `::after` pseudo-elements with `clip-path` animation. Triggers periodically (every 3-5s) or on hover.
 
-### 10. ParticleField.tsx
+### 10. ChamferedPanel.tsx
 
-**Purpose**: Enhanced version of existing particle background.
+**Purpose**: Reusable wrapper component for all panels/cards. Enforces the chamfered corner system.
 
-**Implementation**: Canvas-based particle system (or CSS if performance is better). Slow-moving dots with subtle connecting lines when close. Cyan-tinted. Responds subtly to mouse movement (parallax).
+**Implementation**: Renders a `<div>` with `clip-path: polygon(...)` for 45° chamfered corners. Props: `size?: 'sm' | 'md'` (controls chamfer cut size: 6px or 12px), `glowColor?: string` (optional border glow), `active?: boolean`. Wraps children. Eliminates repetition of clip-path values across components.
 
 ### 11. SoundManager.tsx + useSoundEffect.ts + sounds.ts
 
@@ -351,20 +362,32 @@ export const SOUNDS = {
 Contains all game-specific CSS that doesn't fit in Tailwind utilities:
 
 ```css
-/* Scanline effect */
-/* Glitch animation keyframes */
-/* Glow border utilities */
+/* Chamfered clip-path utilities (.chamfer, .chamfer-sm) */
+/* Glow utilities (.glow-green, .glow-cyan, .glow-magenta, .glow-gold, .glow-cta) */
+/* Text glow (.text-glow) */
+/* Grid background overlay (.void-grid) */
+/* Glitch animation keyframes (periodic, not constant) */
 /* Terminal cursor blink */
-/* HUD panel transitions */
-/* Rarity color border utilities */
-/* Boot sequence animations */
-/* Stat bar fill animation */
+/* HUD panel slide transitions */
+/* Rarity border color utilities */
+/* Stat bar thin fill */
+/* Boot sequence typing animation */
 ```
+
+### Design rules (from impeccable craft-floor)
+
+- No gradient text. Emphasis via weight or size.
+- No glass/blur as decoration. Blur only for functional overlays.
+- No section numbers (01/02/03).
+- No emoji as icons. Use Lucide SVG.
+- No `border-radius` on cards/panels. Use chamfered `clip-path`.
+- Depth: border OR glow, never both heavy on same element.
+- One authored motion per section, not scattered hover effects.
 
 ### index.css modifications
 
-- Remap CSS custom properties for dark theme to sci-fi palette
-- Add new utility classes: `.glow-cyan`, `.glow-purple`, `.glow-gold`
+- Remap CSS custom properties for dark theme to the 3-accent Cyberpunk palette
+- Add Google Fonts import: Orbitron, JetBrains Mono, Inter
 - Keep existing utilities that are still used
 
 ---
@@ -387,8 +410,10 @@ Performance on mobile: Reduce particle count, disable scanline animation, simpli
 - Focus management when panels open/close
 - Keyboard navigation: Tab through panels, Enter to open, Escape to close
 - Sound is muted by default — no auto-playing audio
-- Reduced motion: `@media (prefers-reduced-motion)` disables glitch, scanline, particle animations
-- Color contrast: All text meets WCAG AA against dark backgrounds
+- Reduced motion: `@media (prefers-reduced-motion)` disables glitch and glow animations
+- Color contrast: All text meets WCAG AA (≥4.5:1) against `#0A0A0F` background
+- `cursor-pointer` on all clickable elements
+- Visible focus states for keyboard navigation
 - Skip boot sequence option always visible
 
 ---
@@ -396,10 +421,11 @@ Performance on mobile: Reduce particle count, disable scanline animation, simpli
 ## Performance Considerations
 
 - Audio files loaded lazily (only when unmuted)
-- Particle field uses `requestAnimationFrame` with delta-time, pauses when tab is hidden
+- Grid background is pure CSS (no JS, no canvas)
 - GSAP animations use `will-change` sparingly
 - Images kept as-is (existing project thumbnails)
 - No new heavy dependencies
+- Responsive breakpoints: 375px, 768px, 1024px, 1440px
 
 ---
 
@@ -421,6 +447,27 @@ Performance on mobile: Reduce particle count, disable scanline animation, simpli
 - Backend/database for tracking visitor progress or achievements
 - User accounts or login system
 - Blog/AllPosts page gamification (kept as-is, accessible via direct route if needed)
-- 3D/WebGL effects (keeping to CSS + Canvas for performance)
+- 3D/WebGL effects (keeping to CSS for performance)
 - Mobile app or PWA features
 - i18n / multi-language support
+- Particle field (replaced by static grid background for performance)
+- Scanline overlay (removed per craft-floor: decoration without function)
+
+---
+
+## Copy Tone Guidelines (stop-slop)
+
+All UI text in the terminal should sound direct, specific, and human. No AI writing patterns.
+
+| Rule | Example |
+|------|---------|
+| Active voice | "I shipped 3 production apps" not "Projects were completed" |
+| Name the actor | "I refactored the codebase" not "The codebase was refactored" |
+| Cut filler | State skills directly, no "Here's what I do:" |
+| Two items > three | "Fast and reliable" not "Fast, reliable, and scalable" |
+| Specific claims | "Shipped 3 production apps in 2024" not "Results-driven developer" |
+| No adverbs | "I build production React apps" not "I deeply understand React" |
+| No em dashes | Use commas or periods |
+| No vague claims | Every claim should be verifiable |
+
+Before shipping copy, run through stop-slop quick checks: any adverbs? Kill them. Passive voice? Find the actor. Sounds like a pull-quote? Rewrite.
