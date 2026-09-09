@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export function useTypewriter(
   lines: string[],
@@ -11,10 +11,15 @@ export function useTypewriter(
   const [currentCharIndex, setCurrentCharIndex] = useState<number>(0);
   const [isFinished, setIsFinished] = useState<boolean>(false);
 
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
   useEffect(() => {
+    if (isFinished) return;
+
     if (currentLineIndex >= lines.length) {
       setIsFinished(true);
-      onComplete?.();
+      onCompleteRef.current?.();
       return;
     }
 
@@ -37,13 +42,13 @@ export function useTypewriter(
       }, lineDelay);
       return () => clearTimeout(timeout);
     }
-  }, [currentLineIndex, currentCharIndex, lines, charSpeed, lineDelay, onComplete]);
+  }, [currentLineIndex, currentCharIndex, lines, charSpeed, lineDelay, isFinished]);
 
   const skip = () => {
     setDisplayedLines(lines);
     setCurrentLineIndex(lines.length);
     setIsFinished(true);
-    onComplete?.();
+    onCompleteRef.current?.();
   };
 
   return { displayedLines, isFinished, skip };

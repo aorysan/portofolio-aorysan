@@ -1,9 +1,10 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, renderHook, act } from '@testing-library/react';
 import ChamferedPanel from '../components/gamified/ChamferedPanel';
 import GlitchText from '../components/gamified/GlitchText';
 import StatBar from '../components/gamified/StatBar';
+import { useTypewriter } from '../hooks/useTypewriter';
 
 describe('Tactical UI Primitives', () => {
   it('should render ChamferedPanel with chamfer class and child content', () => {
@@ -23,8 +24,32 @@ describe('Tactical UI Primitives', () => {
   });
 
   it('should render StatBar with proper label and percentage', () => {
-    render(<StatBar label="Architecture" value={85} color="#00D4FF" />);
+    const { unmount } = render(<StatBar label="Architecture" value={85} color="#00D4FF" />);
     expect(screen.getByText('Architecture')).toBeInTheDocument();
     expect(screen.getByText('85%')).toBeInTheDocument();
+    expect(() => unmount()).not.toThrow();
+  });
+
+  it('should run useTypewriter and call onComplete once without duplicate calls on rerender', () => {
+    vi.useFakeTimers();
+    const onComplete = vi.fn();
+    const { result, rerender } = renderHook(
+      ({ lines, cb }) => useTypewriter(lines, 10, 50, cb),
+      { initialProps: { lines: ['Hi'], cb: onComplete } }
+    );
+
+    for (let i = 0; i < 10; i++) {
+      act(() => {
+        vi.advanceTimersByTime(50);
+      });
+    }
+
+    expect(result.current.isFinished).toBe(true);
+    expect(onComplete).toHaveBeenCalledTimes(1);
+
+    // Re-render with new array and new callback
+    rerender({ lines: ['Hi'], cb: vi.fn() });
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
   });
 });

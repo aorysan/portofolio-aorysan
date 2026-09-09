@@ -16,11 +16,14 @@ const StatBar: React.FC<StatBarProps> = ({
 
   useEffect(() => {
     if (barRef.current) {
-      gsap.fromTo(
+      const tween = gsap.fromTo(
         barRef.current,
         { scaleX: 0 },
         { scaleX: 1, duration: 0.8, ease: 'expo.out', transformOrigin: 'left' }
       );
+      return () => {
+        tween.kill();
+      };
     }
   }, [value]);
 
