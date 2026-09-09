@@ -25,7 +25,18 @@ function getAudioContext(): AudioContext | null {
   return sharedAudioContext;
 }
 
+const SYNTHETIC_SOUND_KEYS: ReadonlySet<SoundKey> = new Set([
+  'UI_HOVER',
+  'UI_CLICK',
+  'PANEL_OPEN',
+  'PANEL_CLOSE',
+  'BOOT_TYPE',
+  'BOOT_COMPLETE',
+]);
+
 export function playSyntheticSound(key: SoundKey) {
+  if (!SYNTHETIC_SOUND_KEYS.has(key)) return;
+
   const ctx = getAudioContext();
   if (!ctx) return;
 

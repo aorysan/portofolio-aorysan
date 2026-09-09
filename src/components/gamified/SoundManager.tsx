@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { SOUNDS, playSyntheticSound, SoundKey } from '@/lib/sounds';
+import { playSyntheticSound, SoundKey } from '@/lib/sounds';
 
 interface SoundContextType {
   isMuted: boolean;

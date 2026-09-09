@@ -74,6 +74,30 @@ describe('Sound Registry and Synthetic Audio Engine', () => {
       (window as unknown as { AudioContext: unknown }).AudioContext = originalAudioContext;
     }
   });
+
+  it('should not allocate audio nodes for unhandled keys like AMBIENT', () => {
+    const createOscillatorMock = vi.fn();
+    const createGainMock = vi.fn();
+    const mockCtx = {
+      currentTime: 1.0,
+      state: 'running',
+      destination: {},
+      createOscillator: createOscillatorMock,
+      createGain: createGainMock,
+      resume: vi.fn().mockResolvedValue(undefined),
+    };
+
+    const originalAudioContext = window.AudioContext;
+    (window as unknown as { AudioContext: unknown }).AudioContext = vi.fn(() => mockCtx);
+
+    try {
+      playSyntheticSound('AMBIENT');
+      expect(createOscillatorMock).not.toHaveBeenCalled();
+      expect(createGainMock).not.toHaveBeenCalled();
+    } finally {
+      (window as unknown as { AudioContext: unknown }).AudioContext = originalAudioContext;
+    }
+  });
 });
 
 describe('SoundManager and SoundProvider', () => {
