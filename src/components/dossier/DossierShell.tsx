@@ -3,6 +3,8 @@ import anime from 'animejs';
 import { Volume2, VolumeX } from 'lucide-react';
 import { DossierTabs, DossierTabId, DOSSIER_TABS } from './DossierTabs';
 import { useTactileSound } from './TactileSoundManager';
+import { DossierBerkas } from './DossierBerkas';
+import { DossierJurnal } from './DossierJurnal';
 
 const VALID_TABS: DossierTabId[] = ['berkas', 'jurnal', 'inventaris', 'laporan', 'kronik', 'kontak'];
 
@@ -180,7 +182,13 @@ export const DossierShell: React.FC<DossierShellProps> = ({
             data-testid="dossier-sheet-content"
             className="flex-1 overflow-y-auto dossier-scrollbar p-4 md:p-8 relative select-text pb-20 md:pb-8"
           >
-            {children || (
+            {children ? (
+              children
+            ) : activeTab === 'berkas' ? (
+              <DossierBerkas onNavigateToProjects={() => handleTabSelect('laporan')} />
+            ) : activeTab === 'jurnal' ? (
+              <DossierJurnal />
+            ) : (
               <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
                 <span className="font-cinzel text-xl text-iron tracking-wider mb-2 uppercase">
                   {DOSSIER_TABS.find((t) => t.id === activeTab)?.label}
