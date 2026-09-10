@@ -126,6 +126,14 @@ describe('Dossier Berkas & Jurnal', () => {
         fireEvent.click(redactedBars[1]);
         expect(redactedBars[1].getAttribute('data-revealed')).toBe('true');
       }
+
+      // Peeling via spacebar with preventDefault
+      if (redactedBars[2]) {
+        const parentBtn = redactedBars[2].closest('[role="button"]') || redactedBars[2].parentElement!;
+        const notPrevented = fireEvent.keyDown(parentBtn, { key: ' ' });
+        expect(notPrevented).toBe(false);
+        expect(redactedBars[2].getAttribute('data-revealed')).toBe('true');
+      }
     });
 
     it('handles reduced motion preferences when peeling redacted bar', () => {

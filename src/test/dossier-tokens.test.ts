@@ -15,6 +15,8 @@ describe('Dossier Design Tokens and Typography Setup', () => {
     expect(html).toContain('family=Cinzel:wght@500;700;900');
     expect(html).toContain('family=EB+Garamond:ital,wght@0,400;0,600;1,400;1,600');
     expect(html).toContain('<title>Eren Vanguard | Pakar Rekayasa Antarmuka</title>');
+    expect(html).toContain('"name": "Eren Vanguard"');
+    expect(html).toContain('"jobTitle": "Pakar Rekayasa Antarmuka"');
   });
 
   it('should configure dossier font families in tailwind.config.ts', () => {
@@ -34,6 +36,7 @@ describe('Dossier Design Tokens and Typography Setup', () => {
     expect(tailwindConfig).toContain("moss: '#3D4A34'");
     expect(tailwindConfig).toContain("desk: '#151412'");
     expect(tailwindConfig).toContain("marginalia: '#7A4B3A'");
+    expect(tailwindConfig).toContain("rust: '#7A4B3A'");
   });
 
   it('should define dossier CSS custom properties and utility classes in src/index.css', () => {

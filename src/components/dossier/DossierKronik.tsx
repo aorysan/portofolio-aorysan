@@ -198,7 +198,7 @@ export const DossierKronik: React.FC = () => {
           </div>
         </div>
         <div className="p-3 border border-iron/30 bg-parchment-light/40 flex items-center gap-2.5">
-          <Compass className="w-4 h-4 text-[#8B6E4E] flex-shrink-0" />
+          <Compass className="w-4 h-4 text-rust flex-shrink-0" />
           <div>
             <span className="block font-bold text-iron text-[11px]">EKSPEDISI LAPANGAN</span>
             <span className="text-[10px] text-iron/60">Simulasi & Game Jam Taktis</span>
@@ -211,7 +211,7 @@ export const DossierKronik: React.FC = () => {
         {/* Rusted Iron & Brass Vertical Spine */}
         <div
           aria-hidden="true"
-          className="absolute left-1.5 sm:left-3 md:left-5 top-2 bottom-4 w-1 bg-gradient-to-b from-[#7A4B3A] via-iron/60 to-[#8B6E4E] shadow-xs rounded-full opacity-80"
+          className="absolute left-1.5 sm:left-3 md:left-5 top-2 bottom-4 w-1 bg-gradient-to-b from-rust via-iron/60 to-rust/80 shadow-xs rounded-full opacity-80"
           style={{
             boxShadow: 'inset 0 0 2px rgba(0,0,0,0.6)',
           }}
@@ -244,10 +244,10 @@ export const DossierKronik: React.FC = () => {
                   aria-hidden="true"
                   className={`absolute -left-[23px] sm:-left-[31px] md:-left-[39px] top-1.5 w-6 h-6 rounded-full border-2 border-iron flex items-center justify-center transition-transform group-hover:scale-110 ${
                     isCareer
-                      ? 'bg-[#8B3A2E] text-parchment'
+                      ? 'bg-blood text-parchment'
                       : isEducation
-                      ? 'bg-[#3D4A34] text-parchment'
-                      : 'bg-[#8B6E4E] text-parchment'
+                      ? 'bg-moss text-parchment'
+                      : 'bg-rust text-parchment'
                   } shadow-md`}
                   style={{
                     boxShadow: '0 2px 4px rgba(0,0,0,0.35), inset 0 1px 2px rgba(255,255,255,0.2)',
@@ -313,12 +313,12 @@ export const DossierKronik: React.FC = () => {
 
                   {/* Marginalia Note for the first and third items */}
                   {index === 0 && (
-                    <div className="mt-3 font-caveat text-sm text-[#7A4B3A] italic">
+                    <div className="mt-3 font-caveat text-sm text-rust italic">
                       * Catatan Lapangan: Fokus penuh pada kehandalan rekayasa frontend dan skalabilitas komponen.
                     </div>
                   )}
                   {index === 2 && (
-                    <div className="mt-3 font-caveat text-sm text-[#7A4B3A] italic">
+                    <div className="mt-3 font-caveat text-sm text-rust italic">
                       * Dokumen Pendidikan: Transkrip akademik tersimpan rapi di arsip institusi.
                     </div>
                   )}

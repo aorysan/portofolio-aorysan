@@ -171,6 +171,11 @@ describe('TactileSoundManager', () => {
         result.current.playSound('penClick');
       });
       expect(createOscillatorMock.mock.calls.length).toBe(oscCallCountBefore);
+
+      // Direct playTactileSound call should also respect localStorage muted flag
+      localStorage.setItem('dossier_sound_muted', 'true');
+      playTactileSound('penClick');
+      expect(createOscillatorMock.mock.calls.length).toBe(oscCallCountBefore);
     } finally {
       (window as unknown as { AudioContext: unknown }).AudioContext = originalAudioContext;
     }

@@ -168,6 +168,13 @@ function playPenClick(ctx: AudioContext) {
 }
 
 export function playTactileSound(type: TactileSoundType) {
+  if (
+    typeof window !== 'undefined' &&
+    localStorage.getItem(STORAGE_KEY) === 'true'
+  ) {
+    return;
+  }
+
   const ctx = getAudioContext();
   if (!ctx) return;
 

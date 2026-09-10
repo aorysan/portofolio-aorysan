@@ -31,6 +31,7 @@ export default {
         moss: '#3D4A34',
         desk: '#151412',
         marginalia: '#7A4B3A',
+        rust: '#7A4B3A',
         border: "var(--border)",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

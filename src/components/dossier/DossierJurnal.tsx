@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import anime from 'animejs';
-import { BookOpen, AlertTriangle, Eye, ShieldAlert } from 'lucide-react';
+import { BookOpen, AlertTriangle, Eye } from 'lucide-react';
 import { useTactileSound } from './TactileSoundManager';
 
 interface RedactedBarProps {
@@ -63,7 +63,8 @@ const RedactedBar: React.FC<RedactedBarProps> = ({ classified, codename = 'DIRAH
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+          e.preventDefault();
           handleReveal();
         }
       }}

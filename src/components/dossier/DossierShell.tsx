@@ -187,6 +187,9 @@ export const DossierShell: React.FC<DossierShellProps> = ({
           <div
             ref={sheetContentRef}
             data-testid="dossier-sheet-content"
+            role="tabpanel"
+            id={`tabpanel-${activeTab}`}
+            aria-labelledby={`tab-${activeTab}`}
             className="flex-1 overflow-y-auto dossier-scrollbar p-4 md:p-8 relative select-text pb-20 md:pb-8"
           >
             {children ? (

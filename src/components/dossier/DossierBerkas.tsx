@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import anime from 'animejs';
-import { Compass, FileDown, Shield, Award, ChevronRight } from 'lucide-react';
+import { Compass, FileDown, Shield, ChevronRight } from 'lucide-react';
 import { useTactileSound } from './TactileSoundManager';
 
 export interface DossierBerkasProps {
@@ -27,7 +27,11 @@ export const DossierBerkas: React.FC<DossierBerkasProps> = ({ onNavigateToProjec
         // Safe fallback in minimal environments
       }
       playSound('stampThud');
-      return;
+      return () => {
+        if (stampRef.current) {
+          anime.remove(stampRef.current);
+        }
+      };
     }
 
     try {
@@ -44,6 +48,12 @@ export const DossierBerkas: React.FC<DossierBerkasProps> = ({ onNavigateToProjec
     } catch {
       // Graceful fallback for non-DOM environments
     }
+
+    return () => {
+      if (stampRef.current) {
+        anime.remove(stampRef.current);
+      }
+    };
   }, [playSound]);
 
   const handleOpenExpedition = () => {

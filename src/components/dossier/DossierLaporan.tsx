@@ -186,14 +186,15 @@ export const DossierLaporan: React.FC = () => {
             <div
               key={report.id}
               data-testid="project-card"
-              className={`${report.colSpan} relative bg-parchment-light/95 text-iron border border-iron/40 rounded-xs p-5 sm:p-6 shadow-[0_4px_16px_rgba(28,27,24,0.12)] transition-all duration-200 hover:shadow-[0_12px_28px_rgba(28,27,24,0.22)] hover:border-iron/70 hover:rotate-0 flex flex-col justify-between group`}
+              className={`${report.colSpan} relative bg-parchment-light/95 text-iron border border-iron/40 rounded-xs p-5 sm:p-6 shadow-[0_4px_16px_rgba(28,27,24,0.12)] transition-all duration-200 hover:shadow-[0_12px_28px_rgba(28,27,24,0.22)] hover:border-iron/70 hover:[--card-rotate:0deg] hover:rotate-0 flex flex-col justify-between group`}
               style={{
-                transform: `rotate(${report.rotation}deg)`,
+                '--card-rotate': `${report.rotation}deg`,
+                transform: 'rotate(var(--card-rotate))',
                 backgroundImage: `
                   linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(216, 199, 165, 0.15) 100%),
                   radial-gradient(circle at 10% 10%, rgba(122, 75, 58, 0.03) 0%, transparent 40%)
                 `,
-              }}
+              } as React.CSSProperties}
               onMouseEnter={() => playSound('paperSlide')}
             >
               {/* Paperclip / Staple Accent Top Left */}
@@ -247,6 +248,7 @@ export const DossierLaporan: React.FC = () => {
                   href={report.repoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`Akses Repositori untuk ${report.title}`}
                   onClick={() => playSound('penClick')}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-iron text-parchment-light hover:bg-[#2F2E2A] hover:text-white border border-iron/70 rounded-xs transition-colors duration-150 shadow-xs active:scale-95 group-hover:border-iron"
                 >
@@ -258,6 +260,7 @@ export const DossierLaporan: React.FC = () => {
                   href={report.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`Inspeksi Lapangan untuk ${report.title}`}
                   onClick={() => playSound('penClick')}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-parchment-dark/60 text-iron hover:bg-parchment-dark hover:text-black border border-iron/40 rounded-xs transition-colors duration-150 shadow-xs active:scale-95"
                 >

@@ -136,7 +136,7 @@ describe('Dossier Inventaris & Laporan', () => {
       });
     });
 
-    it('applies asymmetric rotation to project cards for untidy tactical look', () => {
+    it('applies asymmetric rotation to project cards for untidy tactical look and CSS variable', () => {
       render(
         <TactileSoundProvider>
           <DossierLaporan />
@@ -145,6 +145,11 @@ describe('Dossier Inventaris & Laporan', () => {
       const projectCards = screen.getAllByTestId('project-card');
       const rotations = projectCards.map((c) => c.style.transform);
       expect(rotations.some((rot) => rot.includes('rotate'))).toBe(true);
+      const cssVars = projectCards.map((c) => c.style.getPropertyValue('--card-rotate'));
+      expect(cssVars.some((v) => v.includes('deg'))).toBe(true);
+
+      const repoLinks = screen.getAllByRole('link', { name: /akses repositori/i });
+      expect(repoLinks[0].getAttribute('aria-label')).toContain('Akses Repositori untuk');
     });
 
     it('handles card hover and link clicks without errors', () => {

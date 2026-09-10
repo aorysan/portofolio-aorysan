@@ -82,6 +82,11 @@ describe('DossierShell', () => {
     expect(screen.getByTestId('dossier-paper')).toBeDefined();
     expect(screen.getByTestId('test-content')).toBeDefined();
     expect(screen.getByTestId('tab-berkas')).toBeDefined();
+
+    const sheetContent = screen.getByTestId('dossier-sheet-content');
+    expect(sheetContent.getAttribute('role')).toBe('tabpanel');
+    expect(sheetContent.getAttribute('id')).toBe('tabpanel-berkas');
+    expect(sheetContent.getAttribute('aria-labelledby')).toBe('tab-berkas');
   });
 
   it('synchronizes active tab with URL hash on mount', () => {

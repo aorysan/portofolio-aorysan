@@ -100,9 +100,11 @@ export const DossierTabs: React.FC<DossierTabsProps> = ({
           return (
             <button
               key={tab.id}
+              id={`tab-${tab.id}`}
               type="button"
               role="tab"
               data-testid={`tab-${tab.id}`}
+              aria-controls={`tabpanel-${tab.id}`}
               aria-selected={isActive}
               aria-label={`${tab.label} (${tab.code})`}
               title={tab.tooltip}
@@ -158,6 +160,7 @@ export const DossierTabs: React.FC<DossierTabsProps> = ({
               type="button"
               role="tab"
               data-testid={`mobile-tab-${tab.id}`}
+              aria-controls={`tabpanel-${tab.id}`}
               aria-selected={isActive}
               aria-label={tab.label}
               onClick={() => handleTabClick(tab.id)}
