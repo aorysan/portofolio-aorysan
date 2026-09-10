@@ -371,6 +371,8 @@
   .dossier-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: var(--marginalia) var(--parchment-dark);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
   }
 }
 

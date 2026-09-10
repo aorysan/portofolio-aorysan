@@ -42,6 +42,7 @@ export const DossierShell: React.FC<DossierShellProps> = ({
 
   const activeTab = propActiveTab || internalActiveTab;
   const sheetContentRef = useRef<HTMLDivElement>(null);
+  const sheetAnimRef = useRef<HTMLDivElement>(null);
   const previousTabRef = useRef<DossierTabId>(activeTab);
   const isInitialMount = useRef(true);
 
@@ -92,28 +93,36 @@ export const DossierShell: React.FC<DossierShellProps> = ({
       if (sheetContentRef.current) {
         // Reset scroll position on sheet switch
         sheetContentRef.current.scrollTop = 0;
+      }
 
+      const animTarget = sheetAnimRef.current || sheetContentRef.current;
+      if (animTarget) {
         try {
           // Remove ongoing animations before triggering new one
-          anime.remove(sheetContentRef.current);
+          anime.remove(animTarget);
 
           if (prefersReducedMotion) {
             anime({
-              targets: sheetContentRef.current,
+              targets: animTarget,
               opacity: [0, 1],
               duration: 200,
               easing: 'linear',
             });
           } else {
-            // Paper shuffle animation
+            // Paper shuffle animation on inner wrapper so scroll container stays clean
             anime({
-              targets: sheetContentRef.current,
+              targets: animTarget,
               translateX: [-25, 0],
               translateY: [15, 0],
               rotate: [-1, 0],
               opacity: [0, 1],
               duration: 450,
               easing: 'easeOutCubic',
+              complete: () => {
+                if (animTarget) {
+                  animTarget.style.transform = '';
+                }
+              },
             });
           }
         } catch {
@@ -143,10 +152,17 @@ export const DossierShell: React.FC<DossierShellProps> = ({
     toggleMute();
   };
 
+  const handleDeskWheel = (e: React.WheelEvent) => {
+    if (!sheetContentRef.current) return;
+    if (!sheetContentRef.current.contains(e.target as Node)) {
+      sheetContentRef.current.scrollTop += e.deltaY;
+    }
+  };
+
   return (
     <div
       data-testid="dossier-shell"
-      className="relative min-h-screen w-full bg-desk text-iron flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 overflow-hidden select-none"
+      className="relative min-h-screen w-full bg-desk text-iron flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 overflow-y-auto md:overflow-hidden select-none"
       style={{
         backgroundImage: `
           radial-gradient(ellipse at 50% 30%, rgba(216, 199, 165, 0.08) 0%, rgba(21, 20, 18, 0.95) 75%),
@@ -157,12 +173,13 @@ export const DossierShell: React.FC<DossierShellProps> = ({
       {/* Folio Desk Area Container */}
       <div
         data-testid="dossier-desk"
-        className="relative w-full max-w-6xl h-[92vh] md:h-[88vh] flex items-stretch justify-center"
+        onWheel={handleDeskWheel}
+        className="relative w-full max-w-6xl h-[92vh] md:h-[88vh] flex items-stretch justify-center min-h-0"
       >
         {/* Folio Parchment Paper */}
         <div
           data-testid="dossier-paper"
-          className="relative flex-1 bg-parchment paper-texture border border-parchment-dark/70 shadow-2xl flex flex-col overflow-hidden"
+          className="relative flex-1 bg-parchment paper-texture border border-parchment-dark/70 shadow-2xl flex flex-col overflow-hidden min-h-0"
           style={{
             boxShadow: `
               0 20px 45px -10px rgba(0, 0, 0, 0.7),
@@ -172,7 +189,7 @@ export const DossierShell: React.FC<DossierShellProps> = ({
           }}
         >
           {/* Subtle Vintage Pinned / Stamped Header Line */}
-          <div className="flex items-center justify-between px-6 py-2.5 border-b border-parchment-dark/60 bg-parchment-dark/30 text-[11px] font-mono tracking-wider text-iron/70 select-none">
+          <div className="flex shrink-0 items-center justify-between px-6 py-2.5 border-b border-parchment-dark/60 bg-parchment-dark/30 text-[11px] font-mono tracking-wider text-iron/70 select-none">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-blood/80 inline-block" />
               <span className="font-bold text-iron tracking-widest">KORPS PENINJAU // ARSIP RESMI</span>
@@ -187,35 +204,38 @@ export const DossierShell: React.FC<DossierShellProps> = ({
           <div
             ref={sheetContentRef}
             data-testid="dossier-sheet-content"
+            data-lenis-prevent="true"
             role="tabpanel"
             id={`tabpanel-${activeTab}`}
             aria-labelledby={`tab-${activeTab}`}
-            className="flex-1 overflow-y-auto dossier-scrollbar p-4 md:p-8 relative select-text pb-20 md:pb-8"
+            className="flex-1 min-h-0 overflow-y-auto dossier-scrollbar p-4 md:p-8 relative select-text pb-20 md:pb-8"
           >
-            {children ? (
-              children
-            ) : activeTab === 'berkas' ? (
-              <DossierBerkas onNavigateToProjects={() => handleTabSelect('laporan')} />
-            ) : activeTab === 'jurnal' ? (
-              <DossierJurnal />
-            ) : activeTab === 'inventaris' ? (
-              <DossierInventaris />
-            ) : activeTab === 'laporan' ? (
-              <DossierLaporan />
-            ) : activeTab === 'kronik' ? (
-              <DossierKronik />
-            ) : activeTab === 'kontak' ? (
-              <DossierKontak />
-            ) : (
-              <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
-                <span className="font-cinzel text-xl text-iron tracking-wider mb-2 uppercase">
-                  {DOSSIER_TABS.find((t) => t.id === activeTab)?.label}
-                </span>
-                <p className="font-garamond text-base text-iron/70 italic max-w-md">
-                  Lembar dokumen sedang dipersiapkan untuk peninjauan taktis.
-                </p>
-              </div>
-            )}
+            <div ref={sheetAnimRef} className="w-full">
+              {children ? (
+                children
+              ) : activeTab === 'berkas' ? (
+                <DossierBerkas onNavigateToProjects={() => handleTabSelect('laporan')} />
+              ) : activeTab === 'jurnal' ? (
+                <DossierJurnal />
+              ) : activeTab === 'inventaris' ? (
+                <DossierInventaris />
+              ) : activeTab === 'laporan' ? (
+                <DossierLaporan />
+              ) : activeTab === 'kronik' ? (
+                <DossierKronik />
+              ) : activeTab === 'kontak' ? (
+                <DossierKontak />
+              ) : (
+                <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
+                  <span className="font-cinzel text-xl text-iron tracking-wider mb-2 uppercase">
+                    {DOSSIER_TABS.find((t) => t.id === activeTab)?.label}
+                  </span>
+                  <p className="font-garamond text-base text-iron/70 italic max-w-md">
+                    Lembar dokumen sedang dipersiapkan untuk peninjauan taktis.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
