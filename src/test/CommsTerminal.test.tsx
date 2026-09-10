@@ -31,8 +31,8 @@ describe('CommsTerminal Component', () => {
   });
 
   it('should submit form and trigger mailto dispatch', () => {
-    delete (window as any).location;
-    window.location = { href: '' } as any;
+    delete (window as unknown as { location?: unknown }).location;
+    window.location = { href: '' } as unknown as Location;
 
     render(
       <SoundProvider>

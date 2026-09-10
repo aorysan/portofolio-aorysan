@@ -47,7 +47,7 @@ export const DossierShell: React.FC<DossierShellProps> = ({
 
   // Sync state if prop changes
   useEffect(() => {
-    if (propActiveTab && propActiveTab !== internalActiveTab) {
+    if (propActiveTab) {
       setInternalActiveTab(propActiveTab);
     }
   }, [propActiveTab]);

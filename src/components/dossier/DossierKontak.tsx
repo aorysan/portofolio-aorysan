@@ -19,6 +19,7 @@ export const DossierKontak: React.FC = () => {
   const { playSound } = useTactileSound();
 
   useEffect(() => {
+    const stampElement = stampRef.current;
     return () => {
       if (stampTimeoutRef.current) {
         clearTimeout(stampTimeoutRef.current);
@@ -26,9 +27,9 @@ export const DossierKontak: React.FC = () => {
       if (redirectTimeoutRef.current) {
         clearTimeout(redirectTimeoutRef.current);
       }
-      if (stampRef.current) {
+      if (stampElement) {
         try {
-          anime.remove(stampRef.current);
+          anime.remove(stampElement);
         } catch {
           // Ignore
         }

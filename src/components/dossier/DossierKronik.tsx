@@ -126,10 +126,11 @@ export const DossierKronik: React.FC = () => {
       // Safe fallback for headless/JSDOM environments
     }
 
+    const container = containerRef.current;
     return () => {
       try {
-        if (containerRef.current) {
-          const nodes = containerRef.current.querySelectorAll('[data-testid="timeline-node"]');
+        if (container) {
+          const nodes = container.querySelectorAll('[data-testid="timeline-node"]');
           if (nodes.length > 0) {
             anime.remove(nodes);
           }

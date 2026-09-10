@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { User, ClipboardList, Shield, Radio, Terminal } from 'lucide-react';
 import HUDNav from '@/components/gamified/HUDNav';
 import ChamferedPanel from '@/components/gamified/ChamferedPanel';
@@ -17,11 +17,11 @@ const HUDDashboard: React.FC = () => {
   const { play: playOpen } = useSoundEffect('PANEL_OPEN');
   const { play: playClose } = useSoundEffect('PANEL_CLOSE');
 
-  const openPanel = (panel: PanelType) => {
+  const openPanel = useCallback((panel: PanelType) => {
     if (panel) playOpen();
     else playClose();
     setActivePanel(panel);
-  };
+  }, [playOpen, playClose]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -31,7 +31,7 @@ const HUDDashboard: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activePanel]);
+  }, [activePanel, openPanel]);
 
   return (
     <div className="min-h-screen bg-[#0A0A0F] text-[#E0E0E0] pt-20 pb-12 px-6 sm:px-12 flex flex-col justify-between relative z-10">
