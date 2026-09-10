@@ -7,6 +7,8 @@ import { DossierBerkas } from './DossierBerkas';
 import { DossierJurnal } from './DossierJurnal';
 import { DossierInventaris } from './DossierInventaris';
 import { DossierLaporan } from './DossierLaporan';
+import { DossierKronik } from './DossierKronik';
+import { DossierKontak } from './DossierKontak';
 
 const VALID_TABS: DossierTabId[] = ['berkas', 'jurnal', 'inventaris', 'laporan', 'kronik', 'kontak'];
 
@@ -194,6 +196,10 @@ export const DossierShell: React.FC<DossierShellProps> = ({
               <DossierInventaris />
             ) : activeTab === 'laporan' ? (
               <DossierLaporan />
+            ) : activeTab === 'kronik' ? (
+              <DossierKronik />
+            ) : activeTab === 'kontak' ? (
+              <DossierKontak />
             ) : (
               <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
                 <span className="font-cinzel text-xl text-iron tracking-wider mb-2 uppercase">
