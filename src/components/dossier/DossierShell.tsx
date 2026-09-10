@@ -84,7 +84,13 @@ export const DossierShell: React.FC<DossierShellProps> = ({
         window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       if (sheetContentRef.current) {
+        // Reset scroll position on sheet switch
+        sheetContentRef.current.scrollTop = 0;
+
         try {
+          // Remove ongoing animations before triggering new one
+          anime.remove(sheetContentRef.current);
+
           if (prefersReducedMotion) {
             anime({
               targets: sheetContentRef.current,

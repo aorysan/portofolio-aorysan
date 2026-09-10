@@ -79,9 +79,7 @@ export const DossierTabs: React.FC<DossierTabsProps> = ({
   const { playSound } = useTactileSound();
 
   const handleTabClick = (tabId: DossierTabId) => {
-    if (tabId !== activeTab) {
-      playSound('paperSlide');
-    } else {
+    if (tabId === activeTab) {
       playSound('penClick');
     }
     onTabSelect(tabId);
@@ -148,7 +146,7 @@ export const DossierTabs: React.FC<DossierTabsProps> = ({
         data-testid="mobile-expedition-bar"
         aria-label="Navigasi Ekspedisi Bawah"
         role="tablist"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-desk/95 backdrop-blur-md border-t border-parchment-dark/40 px-2 py-1.5 flex items-center justify-around shadow-2xl safe-area-inset-bottom"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-desk/95 backdrop-blur-md border-t border-parchment-dark/40 px-2 pt-1.5 pb-[env(safe-area-inset-bottom)] flex items-center justify-around shadow-2xl"
       >
         {DOSSIER_TABS.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -174,7 +172,7 @@ export const DossierTabs: React.FC<DossierTabsProps> = ({
             >
               <Icon
                 className={`w-5 h-5 ${
-                  isActive ? 'text-blood animate-pulse' : 'text-parchment/70'
+                  isActive ? 'text-blood motion-safe:animate-pulse' : 'text-parchment/70'
                 }`}
               />
               <span className="text-[10px] font-cinzel font-medium uppercase tracking-tight">

@@ -155,6 +155,30 @@ describe('DossierShell', () => {
     expect(activeTab.getAttribute('aria-selected')).toBe('true');
   });
 
+  it('resets scroll position to 0 when active sheet changes', () => {
+    const { rerender } = render(
+      <TactileSoundProvider>
+        <DossierShell activeTab="berkas">
+          <div style={{ height: '2000px' }}>Long sheet content</div>
+        </DossierShell>
+      </TactileSoundProvider>
+    );
+
+    const scrollContainer = screen.getByTestId('dossier-sheet-content');
+    scrollContainer.scrollTop = 450;
+    expect(scrollContainer.scrollTop).toBe(450);
+
+    rerender(
+      <TactileSoundProvider>
+        <DossierShell activeTab="jurnal">
+          <div style={{ height: '2000px' }}>Second sheet content</div>
+        </DossierShell>
+      </TactileSoundProvider>
+    );
+
+    expect(scrollContainer.scrollTop).toBe(0);
+  });
+
   it('executes paper transition safely and respects prefers-reduced-motion', () => {
     // Mock matchMedia for prefers-reduced-motion
     const originalMatchMedia = window.matchMedia;
