@@ -5,6 +5,8 @@ import { DossierTabs, DossierTabId, DOSSIER_TABS } from './DossierTabs';
 import { useTactileSound } from './TactileSoundManager';
 import { DossierBerkas } from './DossierBerkas';
 import { DossierJurnal } from './DossierJurnal';
+import { DossierInventaris } from './DossierInventaris';
+import { DossierLaporan } from './DossierLaporan';
 
 const VALID_TABS: DossierTabId[] = ['berkas', 'jurnal', 'inventaris', 'laporan', 'kronik', 'kontak'];
 
@@ -188,6 +190,10 @@ export const DossierShell: React.FC<DossierShellProps> = ({
               <DossierBerkas onNavigateToProjects={() => handleTabSelect('laporan')} />
             ) : activeTab === 'jurnal' ? (
               <DossierJurnal />
+            ) : activeTab === 'inventaris' ? (
+              <DossierInventaris />
+            ) : activeTab === 'laporan' ? (
+              <DossierLaporan />
             ) : (
               <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
                 <span className="font-cinzel text-xl text-iron tracking-wider mb-2 uppercase">
