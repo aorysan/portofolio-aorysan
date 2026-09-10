@@ -226,8 +226,17 @@ export const DossierKronik: React.FC = () => {
               <article
                 key={event.id}
                 data-testid="timeline-node"
+                tabIndex={0}
+                role="button"
+                aria-label={`Lihat tonggak riwayat: ${event.title}`}
                 onClick={handleNodeClick}
-                className="relative group cursor-pointer transition-all duration-200"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleNodeClick();
+                  }
+                }}
+                className="relative group cursor-pointer transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-blood"
               >
                 {/* Rusted Brass / Iron Node Rivet Anchor */}
                 <div

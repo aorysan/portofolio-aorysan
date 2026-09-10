@@ -58,7 +58,7 @@ describe('Dossier Kronik & Kontak', () => {
       matchMediaSpy.mockRestore();
     });
 
-    it('handles node click or interaction without error', () => {
+    it('handles node click and keyboard interaction without error', () => {
       render(
         <TactileSoundProvider>
           <DossierKronik />
@@ -66,6 +66,10 @@ describe('Dossier Kronik & Kontak', () => {
       );
       const nodes = screen.getAllByTestId('timeline-node');
       fireEvent.click(nodes[0]);
+      fireEvent.keyDown(nodes[0], { key: 'Enter' });
+      fireEvent.keyDown(nodes[0], { key: ' ' });
+      expect(nodes[0].getAttribute('tabindex')).toBe('0');
+      expect(nodes[0].getAttribute('role')).toBe('button');
     });
   });
 
@@ -103,6 +107,11 @@ describe('Dossier Kronik & Kontak', () => {
       // Confirmation message or wet ink stamp should appear
       expect(screen.getByTestId('dispatch-confirmation')).toBeDefined();
       expect(screen.getByText(/DISPOSISI DITERIMA|TERDISPOSISI|DISPOSISI TERKIRIM/i)).toBeDefined();
+
+      // Direct mail link in confirmation card
+      const mailClientLink = screen.getByRole('link', { name: /buka klien surel/i });
+      expect(mailClientLink).toBeDefined();
+      expect(mailClientLink.getAttribute('href')).toContain('mailto:');
     });
 
     it('handles reduced motion preferences on form submission', () => {

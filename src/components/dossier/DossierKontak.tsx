@@ -11,15 +11,20 @@ export const DossierKontak: React.FC = () => {
   const [frekuensiKontak, setFrekuensiKontak] = useState('');
   const [perintahMisi, setPerintahMisi] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submittedMailto, setSubmittedMailto] = useState('');
 
   const stampRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const stampTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { playSound } = useTactileSound();
 
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (stampTimeoutRef.current) {
+        clearTimeout(stampTimeoutRef.current);
+      }
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
       }
       if (stampRef.current) {
         try {
@@ -42,7 +47,7 @@ export const DossierKontak: React.FC = () => {
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // Trigger stamp slam animation on confirmation element
-    timeoutRef.current = setTimeout(() => {
+    stampTimeoutRef.current = setTimeout(() => {
       if (!stampRef.current) return;
 
       if (prefersReducedMotion) {
@@ -78,14 +83,19 @@ export const DossierKontak: React.FC = () => {
       );
       // Construct fallback mailto
       const mailtoUrl = `mailto:${EMAIL}?subject=${subject}&body=${body}`;
-      // In browser environment, we can set location or open link if desired
-      if (typeof window !== 'undefined' && window.location) {
+      setSubmittedMailto(mailtoUrl);
+
+      // In non-test browser environments, attempt automatic mail client opening
+      const isTestEnv =
+        typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
+
+      if (!isTestEnv && typeof window !== 'undefined' && window.location) {
         // Delay opening to let sound & stamp finish playing smoothly
-        setTimeout(() => {
+        redirectTimeoutRef.current = setTimeout(() => {
           try {
             window.location.href = mailtoUrl;
           } catch {
-            // Ignore if blocked in tests
+            // Ignore if blocked in browser
           }
         }, 800);
       }
@@ -96,7 +106,11 @@ export const DossierKontak: React.FC = () => {
 
   const handleReset = () => {
     playSound('paperSlide');
+    if (redirectTimeoutRef.current) {
+      clearTimeout(redirectTimeoutRef.current);
+    }
     setIsSubmitted(false);
+    setSubmittedMailto('');
     setNamaUtusan('');
     setFrekuensiKontak('');
     setPerintahMisi('');
@@ -259,13 +273,25 @@ export const DossierKontak: React.FC = () => {
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={handleReset}
-                className="mt-4 px-4 py-2 border border-iron/40 font-mono text-xs text-iron hover:bg-parchment-dark/40 active:scale-95 transition-all select-none"
-              >
-                [ KIRIM DISPOSISI TAMBAHAN ]
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+                {submittedMailto && (
+                  <a
+                    href={submittedMailto}
+                    onClick={handleLinkClick}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#8B3A2E] text-parchment font-cinzel text-xs font-bold tracking-wider uppercase hover:bg-[#722A20] active:scale-95 border border-iron/40 shadow-sm transition-all"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>BUKA KLIEN SUREL</span>
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="px-4 py-2 border border-iron/40 font-mono text-xs text-iron hover:bg-parchment-dark/40 active:scale-95 transition-all select-none"
+                >
+                  [ KIRIM DISPOSISI TAMBAHAN ]
+                </button>
+              </div>
             </div>
           )}
         </div>
