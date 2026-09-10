@@ -145,7 +145,7 @@ export const DossierShell: React.FC<DossierShellProps> = ({
 
   return (
     <div
-      data-testid="dossier-desk"
+      data-testid="dossier-shell"
       className="relative min-h-screen w-full bg-desk text-iron flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 overflow-hidden select-none"
       style={{
         backgroundImage: `
@@ -155,7 +155,10 @@ export const DossierShell: React.FC<DossierShellProps> = ({
       }}
     >
       {/* Folio Desk Area Container */}
-      <div className="relative w-full max-w-6xl h-[92vh] md:h-[88vh] flex items-stretch justify-center">
+      <div
+        data-testid="dossier-desk"
+        className="relative w-full max-w-6xl h-[92vh] md:h-[88vh] flex items-stretch justify-center"
+      >
         {/* Folio Parchment Paper */}
         <div
           data-testid="dossier-paper"
