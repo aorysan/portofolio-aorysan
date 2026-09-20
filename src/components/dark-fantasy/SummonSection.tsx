@@ -5,23 +5,35 @@ import { useTactileSound } from '../dossier/TactileSoundManager';
 
 export const SummonSection: React.FC = () => {
   const [form, setForm] = useState({ name: '', email: '', objective: '', report: '' });
-  // Safe outside a provider (default context no-ops) and in jsdom
-  // (no AudioContext -> silent no-op), so existing tests are unaffected.
   const { playSound } = useTactileSound();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     playSound('stampThud');
+
+    // Mailto length limit handling per Spec §3.8
+    if (form.report.length > 1800) {
+      toast.error(
+        `Report payload exceeds 1,800 characters. Truncating mailto draft; please transmit complete report directly to ${SUMMON_DATA.dispatch}.`
+      );
+    }
+
+    const trimmedReport = form.report.slice(0, 1800);
     const mailSubject = encodeURIComponent(`[EXPEDITION REPORT] ${form.objective || 'New Directive'}`);
     const mailBody = encodeURIComponent(
-      `Name: ${form.name}\nEmail: ${form.email}\nObjective: ${form.objective}\n\nReport:\n${form.report}`
+      `Name: ${form.name}\nEmail: ${form.email}\nObjective: ${form.objective}\n\nReport:\n${trimmedReport}`
     );
+
     toast.success('Raven dispatched. Launching email transmission.');
     window.location.href = `mailto:${SUMMON_DATA.dispatch}?subject=${mailSubject}&body=${mailBody}`;
   };
 
   return (
-    <section id="summon" className="relative min-h-screen flex flex-col justify-center px-6 sm:px-12 lg:px-24 py-24 z-10 border-t border-[#2a2723]">
+    <section
+      id="summon"
+      aria-labelledby="summon-heading"
+      className="relative min-h-screen flex flex-col justify-center px-6 sm:px-12 lg:px-24 py-24 z-10 border-t border-[#2a2723]"
+    >
       <div className="mb-8">
         <span className="font-military text-xs sm:text-sm tracking-[0.25em] text-[#b4442e]">
           05 — SUMMON
@@ -32,7 +44,7 @@ export const SummonSection: React.FC = () => {
         {/* Left Column: Title & Dispatch Details */}
         <div className="lg:col-span-5 flex flex-col justify-between">
           <div>
-            <h2 className="font-display text-4xl sm:text-5xl font-bold text-[#d6cfc2]">
+            <h2 id="summon-heading" className="font-display text-4xl sm:text-5xl font-bold text-[#d6cfc2]">
               {SUMMON_DATA.title}
             </h2>
             <p className="font-body text-base sm:text-lg text-[#b7ad99] leading-relaxed mt-6">
@@ -109,6 +121,8 @@ export const SummonSection: React.FC = () => {
             </label>
             <textarea
               required
+              minLength={10}
+              maxLength={2000}
               rows={4}
               placeholder="Describe the terrain, the threat, and the timeline."
               value={form.report}

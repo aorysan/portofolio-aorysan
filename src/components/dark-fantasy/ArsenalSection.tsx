@@ -1,5 +1,16 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ARSENAL_DATA } from '../../lib/dark-fantasy-data';
+import { useChapterMode } from './ChapterModeContext';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
+
+// Task 4 carry-forward: strengthened guard — brief verbatim
+// `typeof window !== 'undefined'` alone crashes jsdom because ScrollTrigger
+// touches matchMedia at register. Skip registration when matchMedia is absent.
+if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const SigilIcon: React.FC<{ type: string }> = ({ type }) => {
   switch (type) {
@@ -35,14 +46,48 @@ const SigilIcon: React.FC<{ type: string }> = ({ type }) => {
 };
 
 export const ArsenalSection: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollFXEnabled } = useChapterMode();
+  const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!scrollFXEnabled || reducedMotion || typeof window === 'undefined') return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        '.arsenal-card',
+        { opacity: 0, scale: 0.95 },
+        {
+          opacity: 1,
+          scale: 1,
+          stagger: 0.1,
+          duration: 0.8,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top 80%',
+            once: true,
+          },
+        }
+      );
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [scrollFXEnabled, reducedMotion]);
+
   return (
-    <section id="arsenal" className="relative min-h-screen flex flex-col justify-center px-6 sm:px-12 lg:px-24 py-24 z-10 border-t border-[#2a2723]">
+    <section
+      id="arsenal"
+      ref={containerRef}
+      aria-labelledby="arsenal-heading"
+      className="relative min-h-screen flex flex-col justify-center px-6 sm:px-12 lg:px-24 py-24 z-10 border-t border-[#2a2723]"
+    >
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-14">
         <div>
           <span className="font-military text-xs sm:text-sm tracking-[0.25em] text-[#b4442e]">
             02 — THE ARSENAL
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#d6cfc2] mt-2">
+          <h2 id="arsenal-heading" className="font-display text-3xl sm:text-4xl font-bold text-[#d6cfc2] mt-2">
             DISCIPLINES OF COMBAT
           </h2>
         </div>
@@ -56,7 +101,7 @@ export const ArsenalSection: React.FC = () => {
         {ARSENAL_DATA.map((item) => (
           <div
             key={item.index}
-            className="group relative p-8 sm:p-12 border-r border-b border-[#2a2723] bg-[#0a0908] hover:bg-[#12100e] transition-all duration-300"
+            className="arsenal-card group relative p-8 sm:p-12 border-r border-b border-[#2a2723] bg-[#0a0908] hover:bg-[#12100e] transition-all duration-300"
           >
             {/* Top row: Sigil and quadrant number */}
             <div className="flex items-center justify-between text-[#b7ad99] group-hover:text-[#b4442e] transition-colors">

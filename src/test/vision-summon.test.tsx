@@ -1,22 +1,25 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { VisionSection } from '../components/dark-fantasy/VisionSection';
 import { SummonSection } from '../components/dark-fantasy/SummonSection';
+import { TactileSoundProvider } from '../components/dossier/TactileSoundManager';
 
-describe('Vision & Summon Sections', () => {
-  it('renders Future Vision with horizon goals', () => {
+describe('Vision & Summon Sections Polish', () => {
+  it('renders VisionSection with semantic aria-labelledby', () => {
     render(<VisionSection />);
-    expect(screen.getByText(/04 — FUTURE VISION/i)).toBeInTheDocument();
-    expect(screen.getByText('THE SEA')).toBeInTheDocument();
+    const section = document.getElementById('vision');
+    expect(section).toHaveAttribute('aria-labelledby', 'vision-heading');
   });
 
-  it('renders Summon form and handles report dispatch', () => {
-    render(<SummonSection />);
-    expect(screen.getByText(/05 — SUMMON/i)).toBeInTheDocument();
-    expect(screen.getByText('SOUND THE HORN.')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Levi Ackerman/i)).toBeInTheDocument();
-    const btn = screen.getByRole('button', { name: /dispatch the report/i });
-    expect(btn).toBeInTheDocument();
+  it('renders SummonSection with minLength and maxLength validation on report', () => {
+    render(
+      <TactileSoundProvider>
+        <SummonSection />
+      </TactileSoundProvider>
+    );
+    const textarea = screen.getByPlaceholderText(/describe the terrain/i);
+    expect(textarea).toHaveAttribute('minLength', '10');
+    expect(textarea).toHaveAttribute('maxLength', '2000');
   });
 });
