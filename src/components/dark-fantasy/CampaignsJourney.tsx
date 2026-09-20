@@ -72,45 +72,45 @@ export const CampaignsJourney: React.FC<{
           onOpenDossier(item);
         }
       }}
-      className="group relative w-80 sm:w-96 flex-shrink-0 p-8 rounded border border-[#2a2723] bg-[#0a0908] hover:border-[#b4442e] transition-all duration-300 cursor-pointer text-left flex flex-col justify-between"
+      className="group relative w-full min-w-0 max-w-[280px] lg:max-w-[320px] xl:max-w-[360px] flex-shrink p-5 lg:p-6 xl:p-8 rounded border border-[#2a2723] bg-[#0a0908] hover:border-[#b4442e] transition-all duration-300 cursor-pointer text-left flex flex-col justify-between"
     >
       <div>
-        <div className="flex items-center justify-between text-xs font-military tracking-widest text-[#b7ad99]/70">
-          <span className="px-2 py-0.5 rounded border border-[#2a2723] bg-[#12100e]">
+        <div className="flex items-center justify-between text-xs font-military tracking-widest text-[#b7ad99]/70 gap-2">
+          <span className="px-2 py-0.5 rounded border border-[#2a2723] bg-[#12100e] truncate">
             {item.district}
           </span>
-          <span>{item.year}</span>
+          <span className="flex-shrink-0">{item.year}</span>
         </div>
 
-        <h3 className="font-display text-2xl font-bold text-[#d6cfc2] mt-6 group-hover:text-white transition-colors">
+        <h3 className="font-display text-xl xl:text-2xl font-bold text-[#d6cfc2] mt-4 xl:mt-6 group-hover:text-white transition-colors line-clamp-2">
           {item.title}
         </h3>
         <p className="font-military text-xs tracking-wider text-[#b4442e] uppercase mt-1">
           {item.role}
         </p>
-        <p className="font-body text-sm text-[#b7ad99] line-clamp-3 mt-3">
+        <p className="font-body text-xs xl:text-sm text-[#b7ad99] line-clamp-3 mt-3">
           {item.briefing}
         </p>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-6 xl:mt-8">
         <div className="flex flex-wrap gap-1.5">
           {item.stack.slice(0, 3).map((st) => (
             <span
               key={st}
-              className="px-2 py-0.5 text-[11px] font-military tracking-wider rounded border border-[#2a2723] text-[#b7ad99]"
+              className="px-2 py-0.5 text-[10px] xl:text-[11px] font-military tracking-wider rounded border border-[#2a2723] text-[#b7ad99]"
             >
               {st}
             </span>
           ))}
           {item.stack.length > 3 && (
-            <span className="px-2 py-0.5 text-[11px] font-military text-[#b4442e]">
+            <span className="px-2 py-0.5 text-[10px] xl:text-[11px] font-military text-[#b4442e]">
               +{item.stack.length - 3}
             </span>
           )}
         </div>
 
-        <div className="mt-6 pt-4 border-t border-[#2a2723] flex items-center justify-between text-xs font-military tracking-wider text-[#b7ad99] group-hover:text-[#b4442e]">
+        <div className="mt-4 xl:mt-6 pt-3 xl:pt-4 border-t border-[#2a2723] flex items-center justify-between text-xs font-military tracking-wider text-[#b7ad99] group-hover:text-[#b4442e]">
           <span>INSPECT DOSSIER</span>
           <span className="transition-transform group-hover:translate-x-1">→</span>
         </div>
@@ -124,17 +124,17 @@ export const CampaignsJourney: React.FC<{
         {/* Sina Zone (Oldest / Interior) */}
         <div
           data-layer="sina"
-          className="absolute inset-0 flex items-center justify-center px-6 sm:px-12 lg:px-24"
+          className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12"
         >
-          <div className="flex items-center gap-8 max-w-7xl w-full justify-center">
-            <div className="w-72 flex-shrink-0 text-left">
+          <div className="flex items-center gap-4 lg:gap-5 xl:gap-8 max-w-7xl w-full justify-center">
+            <div className="w-48 lg:w-56 xl:w-72 flex-shrink-0 text-left">
               <span className="font-military text-xs tracking-[0.25em] text-[#b4442e]">
                 ZONE 01 · INTERIOR
               </span>
-              <h2 className="font-display text-4xl font-bold text-[#d6cfc2] mt-2">
+              <h2 className="font-display text-3xl xl:text-4xl font-bold text-[#d6cfc2] mt-2">
                 WALL SINA
               </h2>
-              <p className="font-body text-sm text-[#b7ad99] mt-3">
+              <p className="font-body text-xs xl:text-sm text-[#b7ad99] mt-3">
                 Earliest core architectures and foundations that anchored the journey.
               </p>
             </div>
@@ -153,17 +153,17 @@ export const CampaignsJourney: React.FC<{
         {/* Rose Zone (Mid) */}
         <div
           data-layer="rose"
-          className="absolute inset-0 flex items-center justify-center px-6 sm:px-12 lg:px-24 opacity-0 pointer-events-none"
+          className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 opacity-0 pointer-events-none"
         >
-          <div className="flex items-center gap-8 max-w-7xl w-full justify-center">
-            <div className="w-72 flex-shrink-0 text-left">
+          <div className="flex items-center gap-4 lg:gap-5 xl:gap-8 max-w-7xl w-full justify-center">
+            <div className="w-48 lg:w-56 xl:w-72 flex-shrink-0 text-left">
               <span className="font-military text-xs tracking-[0.25em] text-[#b4442e]">
                 ZONE 02 · INTERMEDIATE
               </span>
-              <h2 className="font-display text-4xl font-bold text-[#d6cfc2] mt-2">
+              <h2 className="font-display text-3xl xl:text-4xl font-bold text-[#d6cfc2] mt-2">
                 WALL ROSE
               </h2>
-              <p className="font-body text-sm text-[#b7ad99] mt-3">
+              <p className="font-body text-xs xl:text-sm text-[#b7ad99] mt-3">
                 Production scale systems and simulation engines deployed under live pressure.
               </p>
             </div>
@@ -182,17 +182,17 @@ export const CampaignsJourney: React.FC<{
         {/* Maria Zone (Latest) */}
         <div
           data-layer="maria"
-          className="absolute inset-0 flex items-center justify-center px-6 sm:px-12 lg:px-24 opacity-0 pointer-events-none"
+          className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 opacity-0 pointer-events-none"
         >
-          <div className="flex items-center gap-8 max-w-7xl w-full justify-center">
-            <div className="w-72 flex-shrink-0 text-left">
+          <div className="flex items-center gap-4 lg:gap-5 xl:gap-8 max-w-7xl w-full justify-center">
+            <div className="w-48 lg:w-56 xl:w-72 flex-shrink-0 text-left">
               <span className="font-military text-xs tracking-[0.25em] text-[#b4442e]">
                 ZONE 03 · FRONTIER
               </span>
-              <h2 className="font-display text-4xl font-bold text-[#d6cfc2] mt-2">
+              <h2 className="font-display text-3xl xl:text-4xl font-bold text-[#d6cfc2] mt-2">
                 WALL MARIA
               </h2>
-              <p className="font-body text-sm text-[#b7ad99] mt-3">
+              <p className="font-body text-xs xl:text-sm text-[#b7ad99] mt-3">
                 The outer rampart of our software: latest production platforms standing guard.
               </p>
             </div>
@@ -211,9 +211,9 @@ export const CampaignsJourney: React.FC<{
         {/* Beyond The Walls (Horizon) */}
         <div
           data-layer="beyond"
-          className="absolute inset-0 flex items-center justify-center px-6 sm:px-12 lg:px-24 opacity-0 pointer-events-none"
+          className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 opacity-0 pointer-events-none"
         >
-          <div className="w-[500px] flex-shrink-0 p-12 rounded border border-[#2a2723] bg-gradient-to-r from-[#0a0908] to-[#4d6155]/20 text-left flex flex-col justify-center">
+          <div className="w-full max-w-lg flex-shrink-0 p-8 xl:p-12 rounded border border-[#2a2723] bg-gradient-to-r from-[#0a0908] to-[#4d6155]/20 text-left flex flex-col justify-center">
             <span className="font-military text-xs tracking-[0.3em] text-[#4d6155] uppercase">
               UNCHARTED TERRITORY
             </span>
