@@ -33,6 +33,7 @@ export const CampaignsJourney: React.FC<{
         ease: 'none',
         scrollTrigger: {
           trigger: containerRef.current,
+          start: 'top top',
           pin: true,
           scrub: 1,
           anticipatePin: 1,
