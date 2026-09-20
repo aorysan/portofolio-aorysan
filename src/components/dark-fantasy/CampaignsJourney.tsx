@@ -52,7 +52,10 @@ export const CampaignsJourney: React.FC<{
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') onOpenDossier(item);
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onOpenDossier(item);
+        }
       }}
       className="group relative w-80 sm:w-96 flex-shrink-0 p-8 rounded border border-[#2a2723] bg-[#0a0908] hover:border-[#b4442e] transition-all duration-300 cursor-pointer text-left flex flex-col justify-between"
     >

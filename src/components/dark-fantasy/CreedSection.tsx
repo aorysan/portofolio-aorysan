@@ -17,7 +17,7 @@ if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
 
 export const CreedSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const wordsRef = useRef<HTMLParagraphElement>(null);
+  const wordsRef = useRef<HTMLQuoteElement>(null);
   const { scrollFXEnabled } = useChapterMode();
   const reducedMotion = useReducedMotion();
 

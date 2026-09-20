@@ -71,7 +71,10 @@ export const CampaignsSection: React.FC = () => {
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') handleOpenDossier(item);
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleOpenDossier(item);
+                  }
                 }}
                 className="group relative p-6 sm:p-8 rounded border border-[#2a2723] bg-[#0a0908] hover:border-[#b4442e] transition-all duration-300 cursor-pointer overflow-hidden text-left"
               >
