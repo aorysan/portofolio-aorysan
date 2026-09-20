@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import SmoothScroll, { useLenisContext } from '../SmoothScroll';
+import { useLenisContext } from '../SmoothScroll';
+import { ChapterModeContext } from './ChapterModeContext';
 import { useTactileSound } from '../dossier/TactileSoundManager';
 import { EmberCanvas } from './EmberCanvas';
 import { TacticalHeader } from './TacticalHeader';
@@ -237,19 +238,28 @@ const ShellBody: React.FC<ShellBodyProps> = ({ mode, onToggleMode, activeIndex, 
 export const DarkFantasyShell: React.FC = () => {
   const [mode, setMode] = useState<ShellMode>('fluid');
   const [activeIndex, setActiveIndex] = useState(0);
+  const { stop, start } = useLenisContext();
 
   const handleToggleMode = useCallback(() => {
-    setMode((prev) => (prev === 'fluid' ? 'chapter' : 'fluid'));
-  }, []);
+    setMode((prev) => {
+      const next = prev === 'fluid' ? 'chapter' : 'fluid';
+      if (next === 'chapter') {
+        stop();
+      } else {
+        start();
+      }
+      return next;
+    });
+  }, [stop, start]);
 
   return (
-    <SmoothScroll enabled={mode === 'fluid'}>
+    <ChapterModeContext.Provider value={{ mode, scrollFXEnabled: mode === 'fluid' }}>
       <ShellBody
         mode={mode}
         onToggleMode={handleToggleMode}
         activeIndex={activeIndex}
         onSelectIndex={setActiveIndex}
       />
-    </SmoothScroll>
+    </ChapterModeContext.Provider>
   );
 };

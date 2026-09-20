@@ -11,11 +11,7 @@ describe('DarkFantasyShell Integration', () => {
         <DarkFantasyShell />
       </TactileSoundProvider>
     );
-    // NOTE (Task 11 fix round): deviates from the brief's exact queries on purpose.
-    // The callsign appears twice by contract (header sr-only hook + footer sign-off)
-    // and BEYOND appears twice by contract (hero monument headline + vision horizon
-    // label), so bare getByText throws. Scoped/count assertions are strictly stronger
-    // and preserve the Task 5/8/10 product copy verbatim.
+
     expect(screen.getAllByText(/Aryo A\.P/i)).toHaveLength(2);
     expect(
       screen.getByText(/ARYO A\.P — DEDICATE YOUR HEART/i)

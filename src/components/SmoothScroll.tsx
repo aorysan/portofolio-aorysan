@@ -1,14 +1,24 @@
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import Lenis from 'lenis';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 interface LenisContextType {
   lenis: Lenis | null;
   scrollTo: (target: string | HTMLElement, options?: Record<string, unknown>) => void;
+  stop: () => void;
+  start: () => void;
 }
 
 const LenisContext = createContext<LenisContextType>({
   lenis: null,
   scrollTo: () => {},
+  stop: () => {},
+  start: () => {},
 });
 
 export const useLenisContext = () => useContext(LenisContext);
@@ -30,7 +40,6 @@ export default function SmoothScroll({
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) return;
 
-    // Headless/jsdom environments lack ResizeObserver which Lenis requires.
     if (typeof ResizeObserver === 'undefined') return;
 
     const lenis = new Lenis({
@@ -42,15 +51,16 @@ export default function SmoothScroll({
 
     lenisRef.current = lenis;
 
-    let rafId: number;
-    function raf(time: number) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-    rafId = requestAnimationFrame(raf);
+    // Synchronize Lenis with GSAP ScrollTrigger per Spec §2.2
+    lenis.on('scroll', ScrollTrigger.update);
+    const tick = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
 
     return () => {
-      cancelAnimationFrame(rafId);
+      gsap.ticker.remove(tick);
       lenis.destroy();
       lenisRef.current = null;
     };
@@ -60,9 +70,6 @@ export default function SmoothScroll({
     if (lenisRef.current) {
       lenisRef.current.scrollTo(target, options);
     } else {
-      // Headless/jsdom environments lack scrollIntoView; guard keeps the
-      // no-Lenis fallback (chapter mode, reduced motion) test-safe.
-      // Browser behavior unchanged.
       if (typeof target === 'string') {
         const el = document.querySelector(target);
         if (el && typeof (el as HTMLElement).scrollIntoView === 'function') {
@@ -76,8 +83,16 @@ export default function SmoothScroll({
     }
   };
 
+  const stop = () => {
+    lenisRef.current?.stop();
+  };
+
+  const start = () => {
+    lenisRef.current?.start();
+  };
+
   return (
-    <LenisContext.Provider value={{ lenis: lenisRef.current, scrollTo }}>
+    <LenisContext.Provider value={{ lenis: lenisRef.current, scrollTo, stop, start }}>
       {children}
     </LenisContext.Provider>
   );
