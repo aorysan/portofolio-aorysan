@@ -1,15 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import React from 'react';
 import { ARSENAL_DATA } from '../../lib/dark-fantasy-data';
-import { useReducedMotion } from '../../hooks/useReducedMotion';
-
-// Task 4 carry-forward: strengthened guard — brief verbatim
-// `typeof window !== 'undefined'` alone crashes jsdom because ScrollTrigger
-// touches matchMedia at register. Skip registration when matchMedia is absent.
-if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
-  gsap.registerPlugin(ScrollTrigger);
-}
+import { useReveal } from '../../hooks/useReveal';
 
 const SigilIcon: React.FC<{ type: string }> = ({ type }) => {
   switch (type) {
@@ -45,33 +36,7 @@ const SigilIcon: React.FC<{ type: string }> = ({ type }) => {
 };
 
 export const ArsenalSection: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const reducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (reducedMotion || typeof window === 'undefined') return;
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.arsenal-card',
-        { opacity: 0, scale: 0.95 },
-        {
-          opacity: 1,
-          scale: 1,
-          stagger: 0.1,
-          duration: 0.8,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: 'top 80%',
-            once: true,
-          },
-        }
-      );
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, [reducedMotion]);
+  const containerRef = useReveal<HTMLDivElement>('.arsenal-card');
 
   return (
     <section

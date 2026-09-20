@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { SUMMON_DATA } from '../../lib/dark-fantasy-data';
 import { useTactileSound } from '../dossier/TactileSoundManager';
+import { useReveal } from '../../hooks/useReveal';
 
 export const SummonSection: React.FC = () => {
   const [form, setForm] = useState({ name: '', email: '', objective: '', report: '' });
   const { playSound } = useTactileSound();
+  const revealRef = useReveal<HTMLDivElement>('.summon-block');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,9 +42,9 @@ export const SummonSection: React.FC = () => {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+      <div ref={revealRef} className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
         {/* Left Column: Title & Dispatch Details */}
-        <div className="lg:col-span-5 flex flex-col justify-between">
+        <div className="summon-block lg:col-span-5 flex flex-col justify-between">
           <div>
             <h2 id="summon-heading" className="font-display text-4xl sm:text-5xl font-bold text-[#d6cfc2]">
               {SUMMON_DATA.title}
@@ -71,7 +73,7 @@ export const SummonSection: React.FC = () => {
         </div>
 
         {/* Right Column: Tactical Form */}
-        <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-5">
+        <form onSubmit={handleSubmit} className="summon-block lg:col-span-7 space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label className="block font-military text-xs tracking-wider text-[#b7ad99] mb-2">
