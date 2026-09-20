@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useCallback } from 'react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -12,6 +12,7 @@ interface LenisContextType {
   scrollTo: (target: string | HTMLElement, options?: Record<string, unknown>) => void;
   stop: () => void;
   start: () => void;
+  refreshTriggers: () => void;
 }
 
 const LenisContext = createContext<LenisContextType>({
@@ -19,9 +20,19 @@ const LenisContext = createContext<LenisContextType>({
   scrollTo: () => {},
   stop: () => {},
   start: () => {},
+  refreshTriggers: () => {},
 });
 
 export const useLenisContext = () => useContext(LenisContext);
+
+const scrollToTarget = (target: string | HTMLElement) => {
+  const el = typeof target === 'string' ? document.querySelector(target) : target;
+  if (el && typeof (el as HTMLElement).scrollIntoView === 'function') {
+    const reduced = typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    (el as HTMLElement).scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
+  }
+};
 
 export default function SmoothScroll({
   children,
@@ -66,22 +77,19 @@ export default function SmoothScroll({
     };
   }, [enabled]);
 
-  const scrollTo = (target: string | HTMLElement, options?: Record<string, unknown>) => {
-    if (lenisRef.current) {
-      lenisRef.current.scrollTo(target, options);
-    } else {
-      if (typeof target === 'string') {
-        const el = document.querySelector(target);
-        if (el && typeof (el as HTMLElement).scrollIntoView === 'function') {
-          (el as HTMLElement).scrollIntoView({ behavior: 'smooth' });
-        }
-      } else if (target instanceof HTMLElement) {
-        if (typeof target.scrollIntoView === 'function') {
-          target.scrollIntoView({ behavior: 'smooth' });
-        }
+  const scrollTo = useCallback((target: string | HTMLElement, options?: Record<string, unknown>) => {
+    try {
+      if (lenisRef.current) {
+        (lenisRef.current as any).scrollTo(target, { duration: 1.4, ...(options ?? {}) });
+        return;
       }
-    }
-  };
+    } catch { /* jatuh ke fallback */ }
+    if (typeof target === 'string' || target instanceof HTMLElement) scrollToTarget(target as any);
+  }, []);
+
+  const refreshTriggers = useCallback(() => {
+    try { ScrollTrigger.refresh(); } catch { /* abaikan di jsdom */ }
+  }, []);
 
   const stop = () => {
     lenisRef.current?.stop();
@@ -92,7 +100,7 @@ export default function SmoothScroll({
   };
 
   return (
-    <LenisContext.Provider value={{ lenis: lenisRef.current, scrollTo, stop, start }}>
+    <LenisContext.Provider value={{ lenis: lenisRef.current, scrollTo, stop, start, refreshTriggers }}>
       {children}
     </LenisContext.Provider>
   );
