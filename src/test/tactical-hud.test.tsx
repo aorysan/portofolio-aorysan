@@ -5,17 +5,13 @@ import { TacticalHeader } from '../components/dark-fantasy/TacticalHeader';
 import { NavRail } from '../components/dark-fantasy/NavRail';
 
 describe('Tactical Header & Navigation Rail A11y', () => {
-  it('includes aria-pressed on mode toggle and audio toggle', () => {
+  it('includes aria-pressed on the audio toggle', () => {
     render(
       <TacticalHeader
-        mode="fluid"
-        onToggleMode={vi.fn()}
         isMuted={false}
         onToggleAudio={vi.fn()}
       />
     );
-    const modeBtn = screen.getByRole('button', { name: /switch navigation mode/i });
-    expect(modeBtn).toHaveAttribute('aria-pressed', 'false');
 
     const audioBtn = screen.getByRole('button', { name: /mute tactical audio/i });
     expect(audioBtn).toHaveAttribute('aria-pressed', 'true');

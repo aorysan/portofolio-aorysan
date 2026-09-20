@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ARSENAL_DATA } from '../../lib/dark-fantasy-data';
-import { useChapterMode } from './ChapterModeContext';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 // Task 4 carry-forward: strengthened guard — brief verbatim
@@ -47,11 +46,10 @@ const SigilIcon: React.FC<{ type: string }> = ({ type }) => {
 
 export const ArsenalSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollFXEnabled } = useChapterMode();
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (!scrollFXEnabled || reducedMotion || typeof window === 'undefined') return;
+    if (reducedMotion || typeof window === 'undefined') return;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -73,7 +71,7 @@ export const ArsenalSection: React.FC = () => {
     }, containerRef);
 
     return () => ctx.revert();
-  }, [scrollFXEnabled, reducedMotion]);
+  }, [reducedMotion]);
 
   return (
     <section

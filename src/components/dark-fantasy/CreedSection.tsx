@@ -3,7 +3,6 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { CREED_DATA } from '../../lib/dark-fantasy-data';
 import profileAvatar from '../../assets/profile-avatar.jpg';
-import { useChapterMode } from './ChapterModeContext';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { splitWords } from '../../hooks/useTextSplit';
 import { TextScramble } from './TextScramble';
@@ -18,13 +17,12 @@ if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
 export const CreedSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const wordsRef = useRef<HTMLQuoteElement>(null);
-  const { scrollFXEnabled } = useChapterMode();
   const reducedMotion = useReducedMotion();
 
   const words = splitWords(CREED_DATA.quote);
 
   useEffect(() => {
-    if (!scrollFXEnabled || reducedMotion || typeof window === 'undefined') return;
+    if (reducedMotion || typeof window === 'undefined') return;
     if (window.innerWidth < 768) return; // Spec §3.4: matikan pin di <768px
 
     const ctx = gsap.context(() => {
@@ -52,7 +50,7 @@ export const CreedSection: React.FC = () => {
     }, containerRef);
 
     return () => ctx.revert();
-  }, [scrollFXEnabled, reducedMotion]);
+  }, [reducedMotion]);
 
   return (
     <section

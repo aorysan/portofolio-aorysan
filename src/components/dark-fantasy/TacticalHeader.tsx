@@ -2,15 +2,11 @@ import React from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 
 interface TacticalHeaderProps {
-  mode: 'fluid' | 'chapter';
-  onToggleMode: () => void;
   isMuted: boolean;
   onToggleAudio: () => void;
 }
 
 export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
-  mode,
-  onToggleMode,
   isMuted,
   onToggleAudio,
 }) => {
@@ -32,24 +28,8 @@ export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
         </span>
       </div>
 
-      {/* Mode Switcher & Audio Controls */}
+      {/* Audio Controls */}
       <div className="flex items-center gap-4">
-        <button
-          onClick={onToggleMode}
-          aria-label="Switch navigation mode"
-          aria-pressed={mode === 'chapter'}
-          className="group flex items-center gap-2 px-3 py-1.5 rounded border border-[#2a2723] bg-[#12100e] text-xs font-military tracking-wider transition-all hover:border-[#b4442e]"
-        >
-          <span className="text-[#b7ad99] group-hover:text-[#d6cfc2]">MODE:</span>
-          <span className={mode === 'fluid' ? 'text-[#b4442e] font-semibold' : 'text-[#b7ad99]'}>
-            FLUID SCROLL
-          </span>
-          <span className="text-[#2a2723]">|</span>
-          <span className={mode === 'chapter' ? 'text-[#b4442e] font-semibold' : 'text-[#b7ad99]'}>
-            CHAPTER SNAP
-          </span>
-        </button>
-
         <button
           onClick={onToggleAudio}
           aria-label={isMuted ? 'Unmute tactical audio' : 'Mute tactical audio'}

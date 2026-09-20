@@ -3,14 +3,12 @@ import { CAMPAIGNS_DATA, Campaign } from '../../lib/dark-fantasy-data';
 import { useTactileSound } from '../dossier/TactileSoundManager';
 import { CampaignDossierModal } from './CampaignDossierModal';
 import { CampaignsJourney } from './CampaignsJourney';
-import { useChapterMode } from './ChapterModeContext';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 export const CampaignsSection: React.FC = () => {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
   const { playSound } = useTactileSound();
-  const { scrollFXEnabled, mode } = useChapterMode();
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
@@ -33,10 +31,9 @@ export const CampaignsSection: React.FC = () => {
     setSelectedCampaign(null);
   };
 
-  // Fallback condition per Spec §3.6 & §3.6.3:
-  // Use horizontal journey only when large screen (>=1000px), fluid mode, and not reduced motion.
-  const showHorizontalJourney =
-    isLargeScreen && scrollFXEnabled && !reducedMotion && mode === 'fluid';
+  // Fallback: horizontal journey only on large screens without reduced
+  // motion; otherwise the Phase 1 vertical grid.
+  const showHorizontalJourney = isLargeScreen && !reducedMotion;
 
   return (
     <section

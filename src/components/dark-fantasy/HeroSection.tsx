@@ -4,7 +4,6 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowDown } from 'lucide-react';
 import { HERO_DATA } from '../../lib/dark-fantasy-data';
-import { useChapterMode } from './ChapterModeContext';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 // Task 4 carry-forward: strengthened guard — brief verbatim
@@ -17,7 +16,6 @@ if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
 export const HeroSection: React.FC<{ onAdvance: () => void }> = ({ onAdvance }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLDivElement>(null);
-  const { scrollFXEnabled } = useChapterMode();
   const reducedMotion = useReducedMotion();
 
   // Entrance animation (Anime.js)
@@ -39,7 +37,7 @@ export const HeroSection: React.FC<{ onAdvance: () => void }> = ({ onAdvance }) 
 
   // GSAP Recession & Fog Parallax ScrollTrigger
   useEffect(() => {
-    if (!scrollFXEnabled || reducedMotion || !containerRef.current || !headlineRef.current) return;
+    if (reducedMotion || !containerRef.current || !headlineRef.current) return;
     if (typeof window === 'undefined' || typeof gsap === 'undefined') return;
 
     const ctx = gsap.context(() => {
@@ -79,7 +77,7 @@ export const HeroSection: React.FC<{ onAdvance: () => void }> = ({ onAdvance }) 
     }, containerRef);
 
     return () => ctx.revert();
-  }, [scrollFXEnabled, reducedMotion]);
+  }, [reducedMotion]);
 
   return (
     <section

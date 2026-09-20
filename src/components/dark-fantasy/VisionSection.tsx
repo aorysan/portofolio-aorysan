@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { VISION_DATA } from '../../lib/dark-fantasy-data';
-import { useChapterMode } from './ChapterModeContext';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 // Task 4 carry-forward: strengthened guard — brief verbatim
@@ -15,11 +14,10 @@ if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
 export const VisionSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
-  const { scrollFXEnabled } = useChapterMode();
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (!scrollFXEnabled || reducedMotion || typeof window === 'undefined') return;
+    if (reducedMotion || typeof window === 'undefined') return;
 
     const ctx = gsap.context(() => {
       // Horizontal text scrub bounded to max ±6%
@@ -50,7 +48,7 @@ export const VisionSection: React.FC = () => {
     }, containerRef);
 
     return () => ctx.revert();
-  }, [scrollFXEnabled, reducedMotion]);
+  }, [reducedMotion]);
 
   return (
     <section
