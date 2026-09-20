@@ -26,7 +26,16 @@ const LenisContext = createContext<LenisContextType>({
 export const useLenisContext = () => useContext(LenisContext);
 
 const scrollToTarget = (target: string | HTMLElement) => {
-  const el = typeof target === 'string' ? document.querySelector(target) : target;
+  let el: Element | null = null;
+  if (typeof target === 'string') {
+    try {
+      el = document.querySelector(target);
+    } catch {
+      return;
+    }
+  } else {
+    el = target;
+  }
   if (el && typeof (el as HTMLElement).scrollIntoView === 'function') {
     const reduced = typeof window.matchMedia === 'function'
       && window.matchMedia('(prefers-reduced-motion: reduce)').matches;

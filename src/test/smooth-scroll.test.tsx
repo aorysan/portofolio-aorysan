@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import SmoothScroll, { useLenisContext } from '../components/SmoothScroll';
 
 const TestChild = () => {
@@ -34,6 +34,20 @@ describe('SmoothScroll Component', () => {
 });
 
 describe('SmoothScroll fallback', () => {
+  let originalScrollIntoView: typeof HTMLElement.prototype.scrollIntoView | undefined;
+
+  beforeEach(() => {
+    originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+  });
+
+  afterEach(() => {
+    if (originalScrollIntoView !== undefined) {
+      HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+    } else {
+      delete (HTMLElement.prototype as any).scrollIntoView;
+    }
+  });
+
   it('calls scrollIntoView on the target element when lenis is absent', () => {
     document.body.innerHTML = '<section id="creed"></section>';
     const spy = vi.fn();
@@ -41,6 +55,25 @@ describe('SmoothScroll fallback', () => {
     render(<SmoothScroll enabled={false}><Probe /></SmoothScroll>);
     fireEvent.click(screen.getByText('Go'));
     expect(spy).toHaveBeenCalled();
+  });
+
+  it('does not throw when an invalid selector is passed to scrollTo', () => {
+    let capturedScrollTo: ((target: string | HTMLElement, options?: Record<string, unknown>) => void) | undefined;
+    const InvalidSelectorProbe = () => {
+      const { scrollTo } = useLenisContext();
+      capturedScrollTo = scrollTo;
+      return <div>Probe</div>;
+    };
+
+    render(
+      <SmoothScroll enabled={false}>
+        <InvalidSelectorProbe />
+      </SmoothScroll>
+    );
+
+    expect(() => {
+      capturedScrollTo!(':::invalid-selector[#');
+    }).not.toThrow();
   });
 
   it('uses auto behavior when prefers-reduced-motion is active', () => {
