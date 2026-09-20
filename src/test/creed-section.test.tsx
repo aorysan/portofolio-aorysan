@@ -4,10 +4,17 @@ import { describe, it, expect } from 'vitest';
 import { CreedSection } from '../components/dark-fantasy/CreedSection';
 
 describe('CreedSection Component', () => {
-  it('renders section title and creed quote', () => {
+  it('renders section heading and semantic section with aria-labelledby', () => {
     render(<CreedSection />);
-    expect(screen.getByText(/01 — THE CREED/i)).toBeInTheDocument();
-    expect(screen.getByText(/I DEDICATE MY HEART/i)).toBeInTheDocument();
-    expect(screen.getByText('YEARS ENLISTED')).toBeInTheDocument();
+    const section = document.getElementById('creed');
+    expect(section).toBeInTheDocument();
+    expect(section).toHaveAttribute('aria-labelledby', 'creed-heading');
+    // NOTE (Task 6 deviation): brief verbatim `getByLabelText('01 — THE CREED')`
+    // matches TWICE once the linkage is correct — the <section> (via
+    // aria-labelledby resolution) and the <span id="creed-heading"> (via
+    // aria-label). Disambiguate with selector; asserts the same heading node.
+    expect(
+      screen.getByLabelText('01 — THE CREED', { selector: '#creed-heading' })
+    ).toBeInTheDocument();
   });
 });
