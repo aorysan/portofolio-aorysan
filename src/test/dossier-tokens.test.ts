@@ -28,15 +28,15 @@ describe('Dossier Design Tokens and Typography Setup', () => {
 
   it('should configure dossier color tokens in tailwind.config.ts', () => {
     const tailwindConfig = fs.readFileSync(tailwindConfigPath, 'utf-8');
-    expect(tailwindConfig).toContain("parchment: '#E8DCC0'");
+    expect(tailwindConfig).toContain("parchment: 'var(--color-parchment)'");
     expect(tailwindConfig).toContain("'parchment-light': '#F4EDE0'");
     expect(tailwindConfig).toContain("'parchment-dark': '#D8C7A5'");
-    expect(tailwindConfig).toContain("iron: '#1C1B18'");
-    expect(tailwindConfig).toContain("blood: '#8B3A2E'");
+    expect(tailwindConfig).toContain("iron: 'var(--color-iron)'");
+    expect(tailwindConfig).toContain("blood: 'var(--color-blood)'");
     expect(tailwindConfig).toContain("moss: '#3D4A34'");
     expect(tailwindConfig).toContain("desk: '#151412'");
     expect(tailwindConfig).toContain("marginalia: '#7A4B3A'");
-    expect(tailwindConfig).toContain("rust: '#7A4B3A'");
+    expect(tailwindConfig).toContain("rust: 'var(--color-rust)'");
   });
 
   it('should define dossier CSS custom properties and utility classes in src/index.css', () => {
