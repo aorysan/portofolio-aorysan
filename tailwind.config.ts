@@ -16,7 +16,9 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Orbitron', 'system-ui', 'sans-serif'],
+        display: ['Cinzel', 'serif'],
+        military: ['Oswald', 'sans-serif'],
+        body: ['Barlow', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
         cinzel: ['Cinzel', 'serif'],
         garamond: ['EB Garamond', 'serif'],

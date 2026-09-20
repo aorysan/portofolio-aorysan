@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Cinzel:wght@400;600;700;900&family=Oswald:wght@300;400;500;600;700&display=swap');
 @import './styles/gamified.css';
 
 @tailwind base;
@@ -374,6 +375,22 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
   }
+}
+
+/* Dark Fantasy design tokens ("Beyond The Walls") */
+:root {
+  --color-ash: #0a0908;
+  --color-soot: #12100e;
+  --color-iron: #1c1a17;
+  --color-stone: #2a2723;
+  --color-bone: #d6cfc2;
+  --color-parchment: #b7ad99;
+  --color-blood: #7c1f1a;
+  --color-ember: #b4442e;
+  --color-rust: #8a4b2b;
+  --color-verdigris: #4d6155;
+  --background: var(--color-ash);
+  --foreground: var(--color-bone);
 }
 
 
