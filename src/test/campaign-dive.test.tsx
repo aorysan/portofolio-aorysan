@@ -9,6 +9,8 @@ describe('CampaignsDive', () => {
     const layers = document.querySelectorAll('[data-layer]');
     expect([...layers].map((l) => l.getAttribute('data-layer'))).toEqual(['sina', 'rose', 'maria', 'beyond']);
     expect(screen.getAllByText('WALL SINA').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('WALL ROSE').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('WALL MARIA').length).toBeGreaterThan(0);
     expect(screen.getByText('BEYOND THE WALLS')).toBeInTheDocument();
   });
 

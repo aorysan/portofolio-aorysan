@@ -26,4 +26,8 @@ dist-ssr
 # Worktrees and Agent artifacts
 .worktrees/
 .superpowers/
+
+# Media assets generated locally
+public/videos/*.mp4
+public/videos/*.raw.mp4
 
