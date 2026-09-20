@@ -35,6 +35,12 @@ export const CampaignsJourney: React.FC<{
           trigger: containerRef.current,
           start: 'top top',
           pin: true,
+          // Required: the trigger's parent (#campaigns) is display:flex, and
+          // ScrollTrigger disables pinSpacing by default inside flex parents
+          // (no spacer padding → pin adds zero scroll length → journey stalls
+          // and the next section overlaps it). Forcing it restores the pin
+          // distance to the page.
+          pinSpacing: true,
           scrub: 1,
           anticipatePin: 1,
           invalidateOnRefresh: true,
