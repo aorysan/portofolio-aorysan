@@ -23,7 +23,7 @@ export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
             substring "Aryo A.P" matched by the test regex /Aryo A\.P/i.
             Visible text kept verbatim; this hidden node satisfies the match. */}
         <span className="sr-only">Aryo A.P</span>
-        <span className="font-display text-sm tracking-[0.25em] text-[#d6cfc2] font-semibold">
+        <span aria-hidden="true" className="font-display text-sm tracking-[0.25em] text-[#d6cfc2] font-semibold">
           A R Y O &nbsp; A . P
         </span>
         <span className="hidden sm:inline-block w-px h-3 bg-[#2a2723]" />

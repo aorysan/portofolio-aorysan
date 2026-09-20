@@ -1,9 +1,23 @@
 import React, { useState } from 'react';
 import { CAMPAIGNS_DATA, Campaign } from '../../lib/dark-fantasy-data';
+import { useTactileSound } from '../dossier/TactileSoundManager';
 import { CampaignDossierModal } from './CampaignDossierModal';
 
 export const CampaignsSection: React.FC = () => {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  // Safe outside a provider (default context no-ops) and in jsdom
+  // (no AudioContext -> silent no-op), so existing tests are unaffected.
+  const { playSound } = useTactileSound();
+
+  const handleOpenDossier = (item: Campaign) => {
+    playSound('paperSlide');
+    setSelectedCampaign(item);
+  };
+
+  const handleCloseDossier = () => {
+    playSound('tapePeel');
+    setSelectedCampaign(null);
+  };
 
   return (
     <section id="campaigns" className="relative min-h-screen flex flex-col justify-center px-6 sm:px-12 lg:px-24 py-24 z-10 border-t border-[#2a2723]">
@@ -26,11 +40,11 @@ export const CampaignsSection: React.FC = () => {
         {CAMPAIGNS_DATA.map((item) => (
           <div
             key={item.id}
-            onClick={() => setSelectedCampaign(item)}
+            onClick={() => handleOpenDossier(item)}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') setSelectedCampaign(item);
+              if (e.key === 'Enter' || e.key === ' ') handleOpenDossier(item);
             }}
             className="group relative p-6 sm:p-8 rounded border border-[#2a2723] bg-[#0a0908] hover:border-[#b4442e] transition-all duration-300 cursor-pointer overflow-hidden"
           >
@@ -80,7 +94,7 @@ export const CampaignsSection: React.FC = () => {
 
       <CampaignDossierModal
         campaign={selectedCampaign}
-        onClose={() => setSelectedCampaign(null)}
+        onClose={handleCloseDossier}
       />
     </section>
   );

@@ -25,7 +25,7 @@ interface ShellBodyProps {
 
 const ShellBody: React.FC<ShellBodyProps> = ({ mode, onToggleMode, activeIndex, onSelectIndex }) => {
   const { scrollTo } = useLenisContext();
-  const { isMuted, toggleMute } = useTactileSound();
+  const { isMuted, toggleMute, playSound } = useTactileSound();
 
   const handleSelectSection = useCallback(
     (id: string, index: number) => {
@@ -36,9 +36,17 @@ const ShellBody: React.FC<ShellBodyProps> = ({ mode, onToggleMode, activeIndex, 
   );
 
   const handleAdvance = useCallback(() => {
+    playSound('paperSlide');
     onSelectIndex(1);
     scrollTo('#creed');
-  }, [onSelectIndex, scrollTo]);
+  }, [onSelectIndex, scrollTo, playSound]);
+
+  // Wrap the shell-level mode toggle with click feedback. Wired here (not
+  // inside TacticalHeader) to keep the header's tested props stable.
+  const handleToggleModeWithSound = useCallback(() => {
+    playSound('penClick');
+    onToggleMode();
+  }, [onToggleMode, playSound]);
 
   useEffect(() => {
     if (mode !== 'chapter') return;
@@ -64,7 +72,7 @@ const ShellBody: React.FC<ShellBodyProps> = ({ mode, onToggleMode, activeIndex, 
   return (
     <div className="relative min-h-screen bg-[#0a0908] text-[#d6cfc2]">
       <EmberCanvas />
-      <TacticalHeader mode={mode} onToggleMode={onToggleMode} isMuted={isMuted} onToggleAudio={toggleMute} />
+      <TacticalHeader mode={mode} onToggleMode={handleToggleModeWithSound} isMuted={isMuted} onToggleAudio={toggleMute} />
       <NavRail activeIndex={activeIndex} onSelectSection={handleSelectSection} />
       <main>
         <HeroSection onAdvance={handleAdvance} />

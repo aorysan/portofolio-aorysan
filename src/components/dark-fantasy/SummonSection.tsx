@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { SUMMON_DATA } from '../../lib/dark-fantasy-data';
+import { useTactileSound } from '../dossier/TactileSoundManager';
 
 export const SummonSection: React.FC = () => {
   const [form, setForm] = useState({ name: '', email: '', objective: '', report: '' });
+  // Safe outside a provider (default context no-ops) and in jsdom
+  // (no AudioContext -> silent no-op), so existing tests are unaffected.
+  const { playSound } = useTactileSound();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    playSound('stampThud');
     const mailSubject = encodeURIComponent(`[EXPEDITION REPORT] ${form.objective || 'New Directive'}`);
     const mailBody = encodeURIComponent(
       `Name: ${form.name}\nEmail: ${form.email}\nObjective: ${form.objective}\n\nReport:\n${form.report}`
