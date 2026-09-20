@@ -23,3 +23,56 @@ describe('Vision & Summon Sections Polish', () => {
     expect(textarea).toHaveAttribute('maxLength', '2000');
   });
 });
+
+describe('Vision video', () => {
+  it('renders muted looping video with poster over storm overlay', () => {
+    render(<VisionSection />);
+    const video = document.querySelector('video');
+    expect(video).toBeInTheDocument();
+    expect(video).toHaveAttribute('muted');
+    expect(video?.querySelector('source')?.getAttribute('src')).toContain('vision-sea-loop');
+    expect(document.querySelector('.vision-storm-overlay')).toBeInTheDocument();
+  });
+
+  it('falls back to poster image when video triggers onError', () => {
+    render(<VisionSection />);
+    const video = document.querySelector('video');
+    expect(video).toBeInTheDocument();
+    fireEvent.error(video!);
+    expect(document.querySelector('video')).toBeNull();
+    const posterImg = document.querySelector('img');
+    expect(posterImg).toBeInTheDocument();
+    expect(posterImg?.getAttribute('src')).toContain('vision-sea-poster.jpg');
+    expect(posterImg).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('falls back to poster image when reduced motion is preferred', () => {
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes('prefers-reduced-motion: reduce'),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
+    try {
+      render(<VisionSection />);
+      expect(document.querySelector('video')).toBeNull();
+      const posterImg = document.querySelector('img');
+      expect(posterImg).toBeInTheDocument();
+      expect(posterImg?.getAttribute('src')).toContain('vision-sea-poster.jpg');
+    } finally {
+      window.matchMedia = originalMatchMedia;
+    }
+  });
+
+  it('renders horizon items with horizon-item class for ScrollTrigger reveal', () => {
+    render(<VisionSection />);
+    const items = document.querySelectorAll('.horizon-item');
+    expect(items.length).toBe(3);
+  });
+});
