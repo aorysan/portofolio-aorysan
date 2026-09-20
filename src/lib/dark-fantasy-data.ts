@@ -149,7 +149,7 @@ export const VISION_DATA = {
   manifesto: 'My ambition isn\'t a finished product. It\'s a horizon that keeps receding: interfaces that anticipate intent, systems that heal themselves, tooling that lets a single engineer defend an entire wall. I\'m building toward a craft where speed and humanity stop being a trade-off.',
   horizons: [
     { label: 'NEXT', goal: 'Ship high-performance AI-augmented interface frameworks' },
-    { label: 'FARTHER', goal: 'Architect distributed resilient open-source tools' },
+    { label: 'BEYOND', goal: 'Architect distributed resilient open-source tools' },
     { label: 'ALWAYS', goal: 'Refuse the comfort of the wall' },
   ],
 };

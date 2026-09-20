@@ -5,7 +5,7 @@ export const DarkFantasyFooter: React.FC = () => {
   return (
     <footer className="relative z-10 px-6 sm:px-12 lg:px-24 py-8 border-t border-[#2a2723] bg-[#0a0908] flex flex-col sm:flex-row items-center justify-between gap-4 font-military text-xs tracking-widest text-[#b7ad99]/60">
       <div className="flex items-center gap-4">
-        <span>ARYO A. P — DEDICATE YOUR HEART</span>
+        <span>ARYO A.P — DEDICATE YOUR HEART</span>
       </div>
 
       <div className="flex items-center gap-6">
