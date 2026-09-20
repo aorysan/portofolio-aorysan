@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { DarkFantasyShell } from '../components/dark-fantasy/DarkFantasyShell';
 import { TactileSoundProvider } from '../components/dossier/TactileSoundManager';
 
@@ -36,5 +36,18 @@ describe('DarkFantasyShell Integration', () => {
     const advanceBtn = screen.getByRole('button', { name: /advance to the creed/i });
     fireEvent.click(advanceBtn);
     expect(screen.getByText(/01 — THE CREED/i)).toBeInTheDocument();
+  });
+
+  it('dispatches creed:complete when selecting creed from nav rail', () => {
+    render(
+      <TactileSoundProvider>
+        <DarkFantasyShell />
+      </TactileSoundProvider>
+    );
+    const spy = vi.fn();
+    window.addEventListener('creed:complete', spy);
+    const railBtn = screen.getByRole('button', { name: /jump to section creed/i });
+    fireEvent.click(railBtn);
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });

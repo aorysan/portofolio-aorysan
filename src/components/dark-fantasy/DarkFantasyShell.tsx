@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useLenisContext } from '../SmoothScroll';
 import { useTactileSound } from '../dossier/TactileSoundManager';
+import { useSectionSpy } from '../../hooks/useSectionSpy';
 import { EmberCanvas } from './EmberCanvas';
 import { TacticalHeader } from './TacticalHeader';
 import { NavRail } from './NavRail';
@@ -21,18 +22,29 @@ export const DarkFantasyShell: React.FC = () => {
   const { isMuted, toggleMute, playSound } = useTactileSound();
   const [activeIndex, setActiveIndex] = useState(0);
 
+  useSectionSpy(SECTION_IDS, setActiveIndex);
+
   // Clamp the index, highlight the rail, and smooth-scroll to the anchor.
-  // No-op when the index is unchanged.
   const goToSection = useCallback(
     (index: number) => {
       const clamped = Math.max(0, Math.min(index, SECTION_IDS.length - 1));
-      if (clamped === activeIndex) return;
       playSound('paperSlide');
       setActiveIndex(clamped);
       const id = SECTION_IDS[clamped];
-      if (id) scrollTo(`#${id}`);
+      if (id) {
+        scrollTo(`#${id}`);
+        if (id === 'creed') window.dispatchEvent(new CustomEvent('creed:complete'));
+        requestAnimationFrame(() => {
+          const h = document.querySelector(`#${id} h1, #${id} h2, #${id} [id$="-heading"]`);
+          if (h && typeof (h as HTMLElement).focus !== 'function') return;
+          if (h) {
+            (h as HTMLElement).setAttribute('tabindex', '-1');
+            (h as HTMLElement).focus({ preventScroll: true });
+          }
+        });
+      }
     },
-    [activeIndex, scrollTo, playSound]
+    [scrollTo, playSound]
   );
 
   const handleSelectSection = useCallback(
