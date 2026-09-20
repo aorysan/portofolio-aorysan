@@ -46,6 +46,18 @@ describe('Vision video', () => {
     expect(posterImg).toHaveAttribute('aria-hidden', 'true');
   });
 
+  it('falls back to poster image when source element triggers onError', () => {
+    render(<VisionSection />);
+    const source = document.querySelector('video source');
+    expect(source).toBeInTheDocument();
+    fireEvent.error(source!);
+    expect(document.querySelector('video')).toBeNull();
+    const posterImg = document.querySelector('img');
+    expect(posterImg).toBeInTheDocument();
+    expect(posterImg?.getAttribute('src')).toContain('vision-sea-poster.jpg');
+    expect(posterImg).toHaveAttribute('aria-hidden', 'true');
+  });
+
   it('falls back to poster image when reduced motion is preferred', () => {
     const originalMatchMedia = window.matchMedia;
     window.matchMedia = vi.fn().mockImplementation((query: string) => ({

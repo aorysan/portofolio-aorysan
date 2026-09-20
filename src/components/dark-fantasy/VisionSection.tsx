@@ -103,7 +103,7 @@ export const VisionSection: React.FC = () => {
           onError={() => setVideoFailed(true)}
           className="absolute inset-0 h-full w-full object-cover opacity-25 pointer-events-none"
         >
-          <source src={videoSrc} type="video/mp4" />
+          <source src={videoSrc} type="video/mp4" onError={() => setVideoFailed(true)} />
         </video>
       ) : (
         <img
