@@ -389,8 +389,6 @@
   --color-ember: #b4442e;
   --color-rust: #8a4b2b;
   --color-verdigris: #4d6155;
-  --background: var(--color-ash);
-  --foreground: var(--color-bone);
 }
 
 
