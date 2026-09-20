@@ -5,12 +5,14 @@ interface WallBreachProps {
   wallName: string;
   zoneLabel: string;
   isBreached?: boolean;
+  progress?: number;
 }
 
 export const WallBreach: React.FC<WallBreachProps> = ({
   wallName,
   zoneLabel,
   isBreached = false,
+  progress,
 }) => {
   const { playSound } = useTactileSound();
   const triggeredRef = useRef(false);
@@ -29,6 +31,8 @@ export const WallBreach: React.FC<WallBreachProps> = ({
     dy: Math.floor(i / 4) * 35 - 35,
     rotate: (i - 6) * 15,
   }));
+
+  const crackOpacity = typeof progress === 'number' ? Math.min(1, Math.max(0, progress)) : undefined;
 
   return (
     <div className="relative w-72 sm:w-96 h-[80vh] flex-shrink-0 flex flex-col items-center justify-center border-x-2 border-[#2a2723] bg-gradient-to-b from-[#1c1a17] via-[#12100e] to-[#0a0908] px-8 text-center select-none overflow-hidden">
@@ -54,6 +58,7 @@ export const WallBreach: React.FC<WallBreachProps> = ({
           viewBox="0 0 100 100"
           className="w-full h-full stroke-[#b4442e] fill-none stroke-2 transition-all duration-700"
           style={{
+            opacity: crackOpacity ?? 1,
             filter: isBreached ? 'drop-shadow(0 0 8px #b4442e)' : undefined,
           }}
         >
