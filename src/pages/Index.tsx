@@ -1,14 +1,13 @@
 import React from 'react';
 import { TactileSoundProvider } from '@/components/dossier/TactileSoundManager';
-import { DossierShell } from '@/components/dossier/DossierShell';
+import { DarkFantasyShell } from '@/components/dark-fantasy/DarkFantasyShell';
 
 const Index: React.FC = () => {
   return (
     <TactileSoundProvider>
-      <DossierShell />
+      <DarkFantasyShell />
     </TactileSoundProvider>
   );
 };
 
 export default Index;
-

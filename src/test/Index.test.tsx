@@ -4,10 +4,9 @@ import React from 'react';
 import Index from '../pages/Index';
 
 describe('Index Page Integration', () => {
-  it('renders Dossier portfolio shell directly without boot sequence blockers', () => {
+  it('renders DarkFantasyShell directly without boot sequence blockers', () => {
     render(<Index />);
-    expect(screen.getByTestId('dossier-shell')).toBeDefined();
-    expect(screen.getByTestId('tab-berkas')).toBeDefined();
+    expect(screen.getByText(/Aryo A\.P/i)).toBeInTheDocument();
+    expect(screen.getByText('BEYOND')).toBeInTheDocument();
   });
 });
-
