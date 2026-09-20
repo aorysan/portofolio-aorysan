@@ -46,8 +46,12 @@ describe('DarkFantasyShell Integration', () => {
     );
     const spy = vi.fn();
     window.addEventListener('creed:complete', spy);
-    const railBtn = screen.getByRole('button', { name: /jump to section creed/i });
-    fireEvent.click(railBtn);
-    expect(spy).toHaveBeenCalledTimes(1);
+    try {
+      const railBtn = screen.getByRole('button', { name: /jump to section creed/i });
+      fireEvent.click(railBtn);
+      expect(spy).toHaveBeenCalledTimes(1);
+    } finally {
+      window.removeEventListener('creed:complete', spy);
+    }
   });
 });

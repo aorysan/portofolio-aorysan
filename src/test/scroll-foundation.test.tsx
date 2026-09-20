@@ -15,16 +15,20 @@ describe('scroll foundation: advance always scrolls', () => {
     const spy = vi.fn();
     window.addEventListener('creed:complete', spy);
 
-    const btn = screen.getByRole('button', { name: /advance to the creed/i });
-    fireEvent.click(btn);
-    fireEvent.click(btn); // klik kedua dengan index sama harus tetap dispatch
+    try {
+      const btn = screen.getByRole('button', { name: /advance to the creed/i });
+      fireEvent.click(btn);
+      fireEvent.click(btn); // klik kedua dengan index sama harus tetap dispatch
 
-    expect(spy).toHaveBeenCalledTimes(2);
+      expect(spy).toHaveBeenCalledTimes(2);
 
-    await new Promise((resolve) => requestAnimationFrame(resolve));
-    const heading = document.getElementById('creed-heading');
-    expect(document.activeElement).toBe(heading);
-    expect(heading?.getAttribute('tabindex')).toBe('-1');
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      const heading = document.getElementById('creed-heading');
+      expect(document.activeElement).toBe(heading);
+      expect(heading?.getAttribute('tabindex')).toBe('-1');
+    } finally {
+      window.removeEventListener('creed:complete', spy);
+    }
   });
 });
 
@@ -66,6 +70,28 @@ describe('useSectionSpy hook', () => {
 
     unmount();
     expect(disconnectSpy).toHaveBeenCalled();
+
+    (globalThis as any).IntersectionObserver = originalIO;
+  });
+
+  it('does not leak or create observers if unmounted before init resolves', async () => {
+    const observeSpy = vi.fn();
+    const disconnectSpy = vi.fn();
+    const originalIO = (globalThis as any).IntersectionObserver;
+    (globalThis as any).IntersectionObserver = class {
+      observe = observeSpy;
+      disconnect = disconnectSpy;
+      unobserve = vi.fn();
+    };
+
+    const onActive = vi.fn();
+    const { unmount } = renderHook(() =>
+      useSectionSpy(['home', 'creed'], onActive)
+    );
+    unmount(); // immediately unmount before async dynamic import completes
+
+    await new Promise((r) => setTimeout(r, 50));
+    expect(observeSpy).not.toHaveBeenCalled();
 
     (globalThis as any).IntersectionObserver = originalIO;
   });
