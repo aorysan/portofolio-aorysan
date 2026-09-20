@@ -1,18 +1,61 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { X, ExternalLink, Github } from 'lucide-react';
 import { Campaign } from '../../lib/dark-fantasy-data';
+import { useLenisContext } from '../SmoothScroll';
 
 export const CampaignDossierModal: React.FC<{
   campaign: Campaign | null;
   onClose: () => void;
 }> = ({ campaign, onClose }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousActiveElementRef = useRef<HTMLElement | null>(null);
+  const { stop, start } = useLenisContext();
+
   useEffect(() => {
+    if (!campaign) return;
+
+    // Save previous active element for focus restoration
+    previousActiveElementRef.current = document.activeElement as HTMLElement | null;
+
+    // Lock scroll
+    stop();
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    // Focus the modal container
+    const closeBtn = modalRef.current?.querySelector('button') as HTMLElement | null;
+    closeBtn?.focus();
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+      } else if (e.key === 'Tab') {
+        if (!modalRef.current) return;
+        const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
     };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+      start();
+      previousActiveElementRef.current?.focus();
+    };
+  }, [campaign, onClose, stop, start]);
 
   if (!campaign) return null;
 
@@ -20,10 +63,12 @@ export const CampaignDossierModal: React.FC<{
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in"
+      aria-label={`Campaign Dossier: ${campaign.title}`}
+      className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in"
       onClick={onClose}
     >
       <div
+        ref={modalRef}
         className="relative w-full max-w-2xl border border-[#2a2723] bg-[#12100e] p-6 sm:p-8 rounded shadow-2xl text-left"
         onClick={(e) => e.stopPropagation()}
       >

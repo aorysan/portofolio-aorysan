@@ -39,7 +39,13 @@ export const EmberCanvas: React.FC<{ count?: number }> = ({ count = 35 }) => {
     };
     window.addEventListener('resize', handleResize);
 
-    const particles: Particle[] = Array.from({ length: count }, () => ({
+    // Mobile particle budgeting: halve particle count on narrow viewports
+    // to save battery/GPU on mobile devices.
+    const isMobileViewport =
+      typeof window.innerWidth === 'number' && window.innerWidth < 768;
+    const effectiveCount = isMobileViewport ? Math.max(1, Math.floor(count / 2)) : count;
+
+    const particles: Particle[] = Array.from({ length: effectiveCount }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
       size: Math.random() * 2 + 0.8,
@@ -82,9 +88,19 @@ export const EmberCanvas: React.FC<{ count?: number }> = ({ count = 35 }) => {
 
     animId = requestAnimationFrame(render);
 
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(animId);
+      } else {
+        animId = requestAnimationFrame(render);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [count]);
 

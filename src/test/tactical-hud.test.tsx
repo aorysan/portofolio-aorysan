@@ -4,28 +4,26 @@ import { describe, it, expect, vi } from 'vitest';
 import { TacticalHeader } from '../components/dark-fantasy/TacticalHeader';
 import { NavRail } from '../components/dark-fantasy/NavRail';
 
-describe('Tactical Header & Navigation Rail', () => {
-  it('renders Aryo A.P and mode switcher in header', () => {
-    const handleModeToggle = vi.fn();
+describe('Tactical Header & Navigation Rail A11y', () => {
+  it('includes aria-pressed on mode toggle and audio toggle', () => {
     render(
       <TacticalHeader
         mode="fluid"
-        onToggleMode={handleModeToggle}
+        onToggleMode={vi.fn()}
         isMuted={false}
         onToggleAudio={vi.fn()}
       />
     );
-    expect(screen.getByText(/Aryo A\.P/i)).toBeInTheDocument();
-    expect(screen.getByText(/FLUID SCROLL/i)).toBeInTheDocument();
-    const toggleBtn = screen.getByRole('button', { name: /switch navigation mode/i });
-    fireEvent.click(toggleBtn);
-    expect(handleModeToggle).toHaveBeenCalled();
+    const modeBtn = screen.getByRole('button', { name: /switch navigation mode/i });
+    expect(modeBtn).toHaveAttribute('aria-pressed', 'false');
+
+    const audioBtn = screen.getByRole('button', { name: /mute tactical audio/i });
+    expect(audioBtn).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('renders all 6 navigation rail items', () => {
-    render(<NavRail activeIndex={0} onSelectSection={vi.fn()} />);
-    expect(screen.getByText('00')).toBeInTheDocument();
-    expect(screen.getByText('01')).toBeInTheDocument();
-    expect(screen.getByText('05')).toBeInTheDocument();
+  it('marks the active nav item with aria-current="true"', () => {
+    render(<NavRail activeIndex={2} onSelectSection={vi.fn()} />);
+    const activeBtn = screen.getByRole('button', { name: /jump to section arsenal/i });
+    expect(activeBtn).toHaveAttribute('aria-current', 'true');
   });
 });

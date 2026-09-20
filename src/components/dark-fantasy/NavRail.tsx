@@ -26,6 +26,7 @@ export const NavRail: React.FC<{
             onClick={() => onSelectSection(sec.id, idx)}
             className="group flex items-center gap-3 text-right focus:outline-none"
             aria-label={`Jump to section ${sec.label}`}
+            aria-current={isActive ? 'true' : undefined}
           >
             <span
               className={`font-military text-xs tracking-wider transition-all duration-300 ${

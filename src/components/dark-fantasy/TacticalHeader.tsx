@@ -37,6 +37,7 @@ export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
         <button
           onClick={onToggleMode}
           aria-label="Switch navigation mode"
+          aria-pressed={mode === 'chapter'}
           className="group flex items-center gap-2 px-3 py-1.5 rounded border border-[#2a2723] bg-[#12100e] text-xs font-military tracking-wider transition-all hover:border-[#b4442e]"
         >
           <span className="text-[#b7ad99] group-hover:text-[#d6cfc2]">MODE:</span>
@@ -52,6 +53,7 @@ export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
         <button
           onClick={onToggleAudio}
           aria-label={isMuted ? 'Unmute tactical audio' : 'Mute tactical audio'}
+          aria-pressed={!isMuted}
           className="p-1.5 rounded border border-[#2a2723] bg-[#12100e] text-[#b7ad99] hover:text-[#d6cfc2] hover:border-[#b4442e] transition-colors"
         >
           {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-[#b4442e]" />}
