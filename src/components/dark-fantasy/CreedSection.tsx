@@ -23,7 +23,19 @@ export const CreedSection: React.FC = () => {
 
   useEffect(() => {
     if (reducedMotion || typeof window === 'undefined') return;
-    if (window.innerWidth < 768) return; // Spec §3.4: matikan pin di <768px
+    if (typeof window.matchMedia !== 'function') return;
+
+    const complete = () => {
+      const els = wordsRef.current?.querySelectorAll('.creed-word');
+      if (!els || els.length === 0) return;
+      try {
+        gsap.to(els, { opacity: 1, duration: 0.3, overwrite: true });
+      } catch {
+        els.forEach((e) => ((e as HTMLElement).style.opacity = '1'));
+      }
+    };
+
+    window.addEventListener('creed:complete', complete);
 
     const ctx = gsap.context(() => {
       const wordElements = wordsRef.current?.querySelectorAll('.creed-word');
@@ -33,23 +45,23 @@ export const CreedSection: React.FC = () => {
           { opacity: 0.15 },
           {
             opacity: 1,
-            stagger: 0.05,
-            ease: 'none',
+            stagger: 0.02,
+            duration: 0.5,
+            ease: 'power1.out',
             scrollTrigger: {
               trigger: containerRef.current,
-              start: 'top top',
-              end: '+=120%',
-              pin: true,
-              scrub: 1,
-              anticipatePin: 1,
-              invalidateOnRefresh: true,
+              start: 'top 75%',
+              toggleActions: 'play none none reverse',
             },
           }
         );
       }
     }, containerRef);
 
-    return () => ctx.revert();
+    return () => {
+      window.removeEventListener('creed:complete', complete);
+      ctx.revert();
+    };
   }, [reducedMotion]);
 
   return (
