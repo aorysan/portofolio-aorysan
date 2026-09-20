@@ -27,19 +27,34 @@ const ShellBody: React.FC<ShellBodyProps> = ({ mode, onToggleMode, activeIndex, 
   const { scrollTo } = useLenisContext();
   const { isMuted, toggleMute, playSound } = useTactileSound();
 
-  const handleSelectSection = useCallback(
-    (id: string, index: number) => {
-      onSelectIndex(index);
-      scrollTo(`#${id}`);
+  // Central chapter stepper: clamps, syncs the rail, and navigates.
+  // Chapter mode only swaps the visible slide (the snap effect below handles
+  // positioning); fluid mode smooth-scrolls to the section anchor.
+  // No-op when the index is unchanged so wheel jitter can't re-trigger snaps.
+  const goToChapter = useCallback(
+    (index: number) => {
+      const clamped = Math.max(0, Math.min(index, SECTION_IDS.length - 1));
+      if (clamped === activeIndex) return;
+      playSound('paperSlide');
+      onSelectIndex(clamped);
+      if (mode !== 'chapter') {
+        const id = SECTION_IDS[clamped];
+        if (id) scrollTo(`#${id}`);
+      }
     },
-    [onSelectIndex, scrollTo]
+    [activeIndex, mode, onSelectIndex, scrollTo, playSound]
+  );
+
+  const handleSelectSection = useCallback(
+    (_id: string, index: number) => {
+      goToChapter(index);
+    },
+    [goToChapter]
   );
 
   const handleAdvance = useCallback(() => {
-    playSound('paperSlide');
-    onSelectIndex(1);
-    scrollTo('#creed');
-  }, [onSelectIndex, scrollTo, playSound]);
+    goToChapter(1);
+  }, [goToChapter]);
 
   // Wrap the shell-level mode toggle with click feedback. Wired here (not
   // inside TacticalHeader) to keep the header's tested props stable.
@@ -48,40 +63,67 @@ const ShellBody: React.FC<ShellBodyProps> = ({ mode, onToggleMode, activeIndex, 
     onToggleMode();
   }, [onToggleMode, playSound]);
 
-  // Central chapter stepper: clamps, syncs the rail, snaps to the section.
-  // No-op when the index is unchanged so wheel jitter can't re-trigger snaps.
-  const goToChapter = useCallback(
-    (index: number) => {
-      const clamped = Math.max(0, Math.min(index, SECTION_IDS.length - 1));
-      if (clamped === activeIndex) return;
-      playSound('paperSlide');
-      onSelectIndex(clamped);
-      const id = SECTION_IDS[clamped];
-      if (id) scrollTo(`#${id}`);
-    },
-    [activeIndex, onSelectIndex, scrollTo, playSound]
-  );
-
   // Chapter Snap deck (spec §5.2): lock window scroll, debounce wheel input,
   // and snap to the active chapter. Restores everything on mode exit/unmount.
   const wheelLockRef = useRef(false);
   const wheelTimerRef = useRef<number | null>(null);
 
+  // True when the active chapter container can still scroll natively in the
+  // given direction — wheel/touch input is then left alone so tall chapters
+  // (e.g. Campaigns) remain readable instead of instantly paging away.
+  const chapterCanScroll = useCallback((index: number, dir: 1 | -1): boolean => {
+    if (typeof document === 'undefined') return false;
+    const id = SECTION_IDS[index];
+    if (!id) return false;
+    const el = document.querySelector(`[data-chapter="${id}"]`);
+    if (!(el instanceof HTMLElement)) return false;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    if (scrollHeight <= clientHeight + 4) return false;
+    return dir > 0 ? scrollTop + clientHeight < scrollHeight - 4 : scrollTop > 4;
+  }, []);
+
+  // Window scroll lock for chapter mode. Positioning lives in the snap effect.
   useEffect(() => {
     if (mode !== 'chapter') return;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    // Snap to the current chapter on entry so the toggle has visible effect.
-    const id = SECTION_IDS[activeIndex];
-    if (id) scrollTo(`#${id}`);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [mode]);
+
+  // Snap effect: entering chapter mode (or changing chapters) parks the
+  // window at the top and rewinds the active slide so the deck always opens
+  // on the current chapter. Property assignment (not window.scrollTo) keeps
+  // this a safe no-op in headless/jsdom environments.
+  useEffect(() => {
+    if (mode !== 'chapter') return;
+    try {
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      const id = SECTION_IDS[activeIndex];
+      if (id) {
+        const el = document.querySelector(`[data-chapter="${id}"]`);
+        if (el) el.scrollTop = 0;
+      }
+    } catch {
+      // Non-DOM environment: positioning is irrelevant.
+    }
+  }, [mode, activeIndex]);
+
+  useEffect(() => {
+    if (mode !== 'chapter') return;
 
     const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      if (wheelLockRef.current) return;
       const delta = e.deltaY;
       if (Math.abs(delta) < 4) return;
+      const dir: 1 | -1 = delta > 0 ? 1 : -1;
+      // Tall chapter with room to scroll: don't hijack, don't advance.
+      if (chapterCanScroll(activeIndex, dir)) return;
+      e.preventDefault();
+      if (wheelLockRef.current) return;
       wheelLockRef.current = true;
-      goToChapter(activeIndex + (delta > 0 ? 1 : -1));
+      goToChapter(activeIndex + dir);
       if (wheelTimerRef.current !== null) window.clearTimeout(wheelTimerRef.current);
       wheelTimerRef.current = window.setTimeout(() => {
         wheelLockRef.current = false;
@@ -90,7 +132,6 @@ const ShellBody: React.FC<ShellBodyProps> = ({ mode, onToggleMode, activeIndex, 
     // Non-passive so preventDefault actually stops the page scroll.
     window.addEventListener('wheel', onWheel, { passive: false });
     return () => {
-      document.body.style.overflow = prevOverflow;
       window.removeEventListener('wheel', onWheel);
       if (wheelTimerRef.current !== null) {
         window.clearTimeout(wheelTimerRef.current);
@@ -98,7 +139,7 @@ const ShellBody: React.FC<ShellBodyProps> = ({ mode, onToggleMode, activeIndex, 
       }
       wheelLockRef.current = false;
     };
-  }, [mode, activeIndex, goToChapter, scrollTo]);
+  }, [mode, activeIndex, goToChapter, chapterCanScroll]);
 
   useEffect(() => {
     if (mode !== 'chapter') return;
@@ -139,10 +180,23 @@ const ShellBody: React.FC<ShellBodyProps> = ({ mode, onToggleMode, activeIndex, 
       const endY = e.changedTouches[0]?.clientY ?? startY;
       const delta = startY - endY;
       if (Math.abs(delta) < 50) return;
-      goToChapter(activeIndex + (delta > 0 ? 1 : -1));
+      const dir: 1 | -1 = delta > 0 ? 1 : -1;
+      // Tall chapter with room to scroll: the native swipe already scrolled
+      // it — don't also page away.
+      if (chapterCanScroll(activeIndex, dir)) return;
+      goToChapter(activeIndex + dir);
     },
-    [mode, activeIndex, goToChapter]
+    [mode, activeIndex, goToChapter, chapterCanScroll]
   );
+
+  const chapters: Array<{ id: string; node: React.ReactNode }> = [
+    { id: 'home', node: <HeroSection onAdvance={handleAdvance} /> },
+    { id: 'creed', node: <CreedSection /> },
+    { id: 'arsenal', node: <ArsenalSection /> },
+    { id: 'campaigns', node: <CampaignsSection /> },
+    { id: 'vision', node: <VisionSection /> },
+    { id: 'summon', node: <SummonSection /> },
+  ];
 
   return (
     <div
@@ -154,14 +208,28 @@ const ShellBody: React.FC<ShellBodyProps> = ({ mode, onToggleMode, activeIndex, 
       <TacticalHeader mode={mode} onToggleMode={handleToggleModeWithSound} isMuted={isMuted} onToggleAudio={toggleMute} />
       <NavRail activeIndex={activeIndex} onSelectSection={handleSelectSection} />
       <main>
-        <HeroSection onAdvance={handleAdvance} />
-        <CreedSection />
-        <ArsenalSection />
-        <CampaignsSection />
-        <VisionSection />
-        <SummonSection />
+        {chapters.map((ch, i) =>
+          mode === 'chapter' ? (
+            // Presentation deck: exactly one viewport slide visible. Tall
+            // chapters inner-scroll; the active slide fades in on each entry.
+            <div
+              key={ch.id}
+              data-chapter={ch.id}
+              className={
+                i === activeIndex ? 'h-[100vh] overflow-y-auto animate-fade-in' : 'hidden'
+              }
+            >
+              {ch.node}
+            </div>
+          ) : (
+            <div key={ch.id} data-chapter={ch.id}>
+              {ch.node}
+            </div>
+          )
+        )}
       </main>
-      <DarkFantasyFooter />
+      {/* The deck is the six chapters; the footer belongs to fluid scroll. */}
+      {mode === 'fluid' && <DarkFantasyFooter />}
     </div>
   );
 };
