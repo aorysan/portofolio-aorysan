@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { CAMPAIGNS_DATA, Campaign } from '../../lib/dark-fantasy-data';
 import { WallBreach } from './WallBreach';
+import { useTactileSound } from '../dossier/TactileSoundManager';
 
 // Task 4 carry-forward: strengthened guard — `typeof window !== 'undefined'`
 // alone crashes jsdom because ScrollTrigger touches matchMedia at register.
@@ -15,6 +16,7 @@ export const CampaignsJourney: React.FC<{
   onOpenDossier: (campaign: Campaign) => void;
 }> = ({ onOpenDossier }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { playSound } = useTactileSound();
 
   const sinaProjects = CAMPAIGNS_DATA.filter((c) => c.wallZone === 'sina');
   const roseProjects = CAMPAIGNS_DATA.filter((c) => c.wallZone === 'rose');
@@ -40,25 +42,58 @@ export const CampaignsJourney: React.FC<{
 
       // Zone 1: Wall Sina -> Breach -> Wall Rose
       tl.to('[data-layer="sina"]', { scale: 1.6, opacity: 0, pointerEvents: 'none', ease: 'none', duration: 1 });
-      tl.fromTo('[data-breach="sina"]', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1.05, ease: 'none', duration: 0.4 }, '<');
+      tl.fromTo(
+        '[data-breach="sina"]',
+        { opacity: 0, scale: 0.9 },
+        {
+          opacity: 1,
+          scale: 1.05,
+          ease: 'none',
+          duration: 0.4,
+          onStart: () => playSound('stampThud'),
+        },
+        '<'
+      );
       tl.to('[data-breach="sina"]', { opacity: 0, duration: 0.3 });
       tl.fromTo('[data-layer="rose"]', { opacity: 0, scale: 0.9, pointerEvents: 'none' }, { opacity: 1, scale: 1, pointerEvents: 'auto', ease: 'none', duration: 0.5 });
 
       // Zone 2: Wall Rose -> Breach -> Wall Maria
       tl.to('[data-layer="rose"]', { scale: 1.6, opacity: 0, pointerEvents: 'none', ease: 'none', duration: 1 });
-      tl.fromTo('[data-breach="rose"]', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1.05, ease: 'none', duration: 0.4 }, '<');
+      tl.fromTo(
+        '[data-breach="rose"]',
+        { opacity: 0, scale: 0.9 },
+        {
+          opacity: 1,
+          scale: 1.05,
+          ease: 'none',
+          duration: 0.4,
+          onStart: () => playSound('stampThud'),
+        },
+        '<'
+      );
       tl.to('[data-breach="rose"]', { opacity: 0, duration: 0.3 });
       tl.fromTo('[data-layer="maria"]', { opacity: 0, scale: 0.9, pointerEvents: 'none' }, { opacity: 1, scale: 1, pointerEvents: 'auto', ease: 'none', duration: 0.5 });
 
       // Zone 3: Wall Maria -> Breach -> Beyond The Walls
       tl.to('[data-layer="maria"]', { scale: 1.6, opacity: 0, pointerEvents: 'none', ease: 'none', duration: 1 });
-      tl.fromTo('[data-breach="maria"]', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1.05, ease: 'none', duration: 0.4 }, '<');
+      tl.fromTo(
+        '[data-breach="maria"]',
+        { opacity: 0, scale: 0.9 },
+        {
+          opacity: 1,
+          scale: 1.05,
+          ease: 'none',
+          duration: 0.4,
+          onStart: () => playSound('stampThud'),
+        },
+        '<'
+      );
       tl.to('[data-breach="maria"]', { opacity: 0, duration: 0.3 });
       tl.fromTo('[data-layer="beyond"]', { opacity: 0, scale: 0.94, pointerEvents: 'none' }, { opacity: 1, scale: 1, pointerEvents: 'auto', ease: 'none', duration: 1 });
     }, containerRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [playSound]);
 
   const renderProjectCard = (item: Campaign) => (
     <div

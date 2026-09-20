@@ -47,15 +47,22 @@ describe('useSectionSpy hook', () => {
     const observeSpy = vi.fn();
     const disconnectSpy = vi.fn();
 
-    const originalIO = (globalThis as any).IntersectionObserver;
-    (globalThis as any).IntersectionObserver = class {
-      constructor(cb: any) {
+    type MockIOConstructor = new (cb: (entries: Array<{ target: Element; isIntersecting: boolean }>) => void) => IntersectionObserver;
+    const globalContext = globalThis as unknown as { IntersectionObserver: MockIOConstructor | undefined };
+    const originalIO = globalContext.IntersectionObserver;
+
+    globalContext.IntersectionObserver = class {
+      constructor(cb: (entries: Array<{ target: Element; isIntersecting: boolean }>) => void) {
         observerCb = cb;
       }
       observe = observeSpy;
       disconnect = disconnectSpy;
       unobserve = vi.fn();
-    };
+      root = null;
+      rootMargin = '';
+      thresholds = [];
+      takeRecords = () => [];
+    } as unknown as MockIOConstructor;
 
     const onActive = vi.fn();
     const { unmount } = renderHook(() =>
@@ -74,18 +81,25 @@ describe('useSectionSpy hook', () => {
     unmount();
     expect(disconnectSpy).toHaveBeenCalled();
 
-    (globalThis as any).IntersectionObserver = originalIO;
+    globalContext.IntersectionObserver = originalIO;
   });
 
   it('does not leak or create observers if unmounted before init resolves', async () => {
     const observeSpy = vi.fn();
     const disconnectSpy = vi.fn();
-    const originalIO = (globalThis as any).IntersectionObserver;
-    (globalThis as any).IntersectionObserver = class {
+    type MockIOConstructor = new (cb: (entries: Array<{ target: Element; isIntersecting: boolean }>) => void) => IntersectionObserver;
+    const globalContext = globalThis as unknown as { IntersectionObserver: MockIOConstructor | undefined };
+    const originalIO = globalContext.IntersectionObserver;
+
+    globalContext.IntersectionObserver = class {
       observe = observeSpy;
       disconnect = disconnectSpy;
       unobserve = vi.fn();
-    };
+      root = null;
+      rootMargin = '';
+      thresholds = [];
+      takeRecords = () => [];
+    } as unknown as MockIOConstructor;
 
     const onActive = vi.fn();
     const { unmount } = renderHook(() =>
@@ -96,7 +110,7 @@ describe('useSectionSpy hook', () => {
     await new Promise((r) => setTimeout(r, 50));
     expect(observeSpy).not.toHaveBeenCalled();
 
-    (globalThis as any).IntersectionObserver = originalIO;
+    globalContext.IntersectionObserver = originalIO;
   });
 });
 

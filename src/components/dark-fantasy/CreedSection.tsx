@@ -52,6 +52,8 @@ export const CreedSection: React.FC = () => {
               trigger: containerRef.current,
               start: 'top 75%',
               toggleActions: 'play none none reverse',
+              onEnter: complete,
+              onEnterBack: complete,
             },
           }
         );

@@ -86,14 +86,34 @@ export default function SmoothScroll({
     };
   }, [enabled]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleLoad = () => {
+      try {
+        ScrollTrigger.refresh();
+      } catch {
+        /* no-op in test/jsdom */
+      }
+    };
+    window.addEventListener('load', handleLoad);
+    if ('fonts' in document && typeof document.fonts.ready?.then === 'function') {
+      document.fonts.ready.then(handleLoad).catch(() => {});
+    }
+    return () => {
+      window.removeEventListener('load', handleLoad);
+    };
+  }, []);
+
   const scrollTo = useCallback((target: string | HTMLElement, options?: Record<string, unknown>) => {
     try {
       if (lenisRef.current) {
-        (lenisRef.current as any).scrollTo(target, { duration: 1.4, ...(options ?? {}) });
+        lenisRef.current.scrollTo(target, { duration: 1.4, ...(options ?? {}) });
         return;
       }
     } catch { /* jatuh ke fallback */ }
-    if (typeof target === 'string' || target instanceof HTMLElement) scrollToTarget(target as any);
+    if (typeof target === 'string' || target instanceof HTMLElement) {
+      scrollToTarget(target);
+    }
   }, []);
 
   const refreshTriggers = useCallback(() => {

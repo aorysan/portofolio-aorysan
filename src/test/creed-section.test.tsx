@@ -72,7 +72,9 @@ describe('CreedSection Component', () => {
         }),
       })
     );
-    const callArgs = fromToSpy.mock.calls[0]?.[2] as any;
+    const callArgs = fromToSpy.mock.calls[0]?.[2] as
+      | { scrollTrigger?: { pin?: unknown; scrub?: unknown } }
+      | undefined;
     expect(callArgs?.scrollTrigger?.pin).toBeUndefined();
     expect(callArgs?.scrollTrigger?.scrub).toBeUndefined();
   });

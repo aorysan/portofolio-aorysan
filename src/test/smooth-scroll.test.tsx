@@ -44,14 +44,15 @@ describe('SmoothScroll fallback', () => {
     if (originalScrollIntoView !== undefined) {
       HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
     } else {
-      delete (HTMLElement.prototype as any).scrollIntoView;
+      const proto = HTMLElement.prototype as unknown as Record<string, unknown>;
+      delete proto.scrollIntoView;
     }
   });
 
   it('calls scrollIntoView on the target element when lenis is absent', () => {
     document.body.innerHTML = '<section id="creed"></section>';
     const spy = vi.fn();
-    (HTMLElement.prototype as any).scrollIntoView = spy;
+    HTMLElement.prototype.scrollIntoView = spy as unknown as typeof HTMLElement.prototype.scrollIntoView;
     render(<SmoothScroll enabled={false}><Probe /></SmoothScroll>);
     fireEvent.click(screen.getByText('Go'));
     expect(spy).toHaveBeenCalled();
@@ -79,7 +80,7 @@ describe('SmoothScroll fallback', () => {
   it('uses auto behavior when prefers-reduced-motion is active', () => {
     document.body.innerHTML = '<section id="creed"></section>';
     const spy = vi.fn();
-    (HTMLElement.prototype as any).scrollIntoView = spy;
+    HTMLElement.prototype.scrollIntoView = spy as unknown as typeof HTMLElement.prototype.scrollIntoView;
 
     const originalMatchMedia = window.matchMedia;
     window.matchMedia = vi.fn().mockImplementation((query: string) => ({

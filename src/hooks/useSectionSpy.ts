@@ -3,20 +3,21 @@ import { useEffect, useRef } from 'react';
 export function useSectionSpy(ids: string[], onActive: (index: number) => void): void {
   const onActiveRef = useRef(onActive);
   onActiveRef.current = onActive;
+  const idsKey = ids.join(',');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     let isCancelled = false;
-    let cleanup: Array<() => void> = [];
+    const cleanup: Array<() => void> = [];
 
     const init = async () => {
       try {
-        const gsapMod = await import('gsap');
         const stMod = await import('gsap/ScrollTrigger');
         if (isCancelled) return;
 
-        const gsap = (gsapMod as any).default ?? gsapMod;
-        const ScrollTrigger = (stMod as any).ScrollTrigger ?? (stMod as any).default;
+        const ScrollTrigger =
+          (stMod as { ScrollTrigger?: typeof import('gsap/ScrollTrigger').ScrollTrigger; default?: typeof import('gsap/ScrollTrigger').ScrollTrigger }).ScrollTrigger ??
+          (stMod as { default?: typeof import('gsap/ScrollTrigger').ScrollTrigger }).default;
         if (typeof window.matchMedia !== 'function' || !ScrollTrigger) throw new Error('no-st');
 
         ids.forEach((id, index) => {
@@ -26,7 +27,7 @@ export function useSectionSpy(ids: string[], onActive: (index: number) => void):
             trigger,
             start: 'top center',
             end: 'bottom center',
-            onToggle: (self: any) => {
+            onToggle: (self: { isActive: boolean }) => {
               if (self.isActive && !isCancelled) onActiveRef.current(index);
             },
           });
@@ -62,5 +63,5 @@ export function useSectionSpy(ids: string[], onActive: (index: number) => void):
       isCancelled = true;
       cleanup.forEach((fn) => fn());
     };
-  }, [ids.join(','), onActive]);
+  }, [ids, idsKey]);
 }

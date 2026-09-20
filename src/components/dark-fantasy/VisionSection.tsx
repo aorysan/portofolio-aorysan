@@ -24,7 +24,7 @@ export const VisionSection: React.FC = () => {
   const posterSrc = `${normalizedBase}videos/vision-sea-poster.jpg`;
 
   useEffect(() => {
-    if (reducedMotion || typeof window === 'undefined') return;
+    if (reducedMotion || typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
 
     const ctx = gsap.context(() => {
       // Horizontal text scrub bounded to max ±6%
@@ -95,7 +95,6 @@ export const VisionSection: React.FC = () => {
           }}
           autoPlay
           muted
-          defaultMuted
           loop
           playsInline
           preload="metadata"
@@ -110,6 +109,9 @@ export const VisionSection: React.FC = () => {
           src={posterSrc}
           alt=""
           aria-hidden="true"
+          onError={(e) => {
+            (e.currentTarget as HTMLElement).style.display = 'none';
+          }}
           className="absolute inset-0 h-full w-full object-cover opacity-25 pointer-events-none"
         />
       )}

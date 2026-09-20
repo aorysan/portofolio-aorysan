@@ -16,8 +16,13 @@ export const WallBreach: React.FC<WallBreachProps> = ({
 }) => {
   const { playSound } = useTactileSound();
   const triggeredRef = useRef(false);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     if (isBreached && !triggeredRef.current) {
       triggeredRef.current = true;
       playSound('stampThud');

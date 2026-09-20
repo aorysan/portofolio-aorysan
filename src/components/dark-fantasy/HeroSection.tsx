@@ -38,7 +38,7 @@ export const HeroSection: React.FC<{ onAdvance: () => void }> = ({ onAdvance }) 
   // GSAP Recession & Fog Parallax ScrollTrigger
   useEffect(() => {
     if (reducedMotion || !containerRef.current || !headlineRef.current) return;
-    if (typeof window === 'undefined' || typeof gsap === 'undefined') return;
+    if (typeof window === 'undefined' || typeof gsap === 'undefined' || typeof window.matchMedia !== 'function') return;
 
     const ctx = gsap.context(() => {
       gsap.to(headlineRef.current, {

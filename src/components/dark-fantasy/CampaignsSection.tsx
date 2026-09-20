@@ -4,12 +4,14 @@ import { useTactileSound } from '../dossier/TactileSoundManager';
 import { CampaignDossierModal } from './CampaignDossierModal';
 import { CampaignsJourney } from './CampaignsJourney';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
+import { useReveal } from '../../hooks/useReveal';
 
 export const CampaignsSection: React.FC = () => {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
   const { playSound } = useTactileSound();
   const reducedMotion = useReducedMotion();
+  const fallbackGridRef = useReveal<HTMLDivElement>('.campaign-card');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -41,6 +43,9 @@ export const CampaignsSection: React.FC = () => {
       aria-labelledby="campaigns-heading"
       className="relative min-h-screen flex flex-col justify-center z-10 border-t border-[#2a2723]"
     >
+      <h2 id="campaigns-heading" className="sr-only">
+        03 — CAMPAIGNS
+      </h2>
       {showDive ? (
         <CampaignsJourney onOpenDossier={handleOpenDossier} />
       ) : (
@@ -50,17 +55,17 @@ export const CampaignsSection: React.FC = () => {
               <span className="font-military text-xs sm:text-sm tracking-[0.25em] text-[#b4442e]">
                 03 — CAMPAIGNS
               </span>
-              <h2 id="campaigns-heading" className="font-display text-3xl sm:text-4xl font-bold text-[#d6cfc2] mt-2">
+              <div className="font-display text-3xl sm:text-4xl font-bold text-[#d6cfc2] mt-2">
                 THE WALL.
-              </h2>
+              </div>
             </div>
             <p className="font-body text-sm text-[#b7ad99] max-w-sm">
               All six deployed fortifications across the outer and inner walls. Select any sector to inspect tactical dossier.
             </p>
           </div>
 
-          {/* Responsive Vertical Grid (Phase 1 fallback) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Responsive Vertical Grid (Phase 1 fallback) with reversible reveal */}
+          <div ref={fallbackGridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {CAMPAIGNS_DATA.map((item) => (
               <div
                 key={item.id}
@@ -73,7 +78,7 @@ export const CampaignsSection: React.FC = () => {
                     handleOpenDossier(item);
                   }
                 }}
-                className="group relative p-6 sm:p-8 rounded border border-[#2a2723] bg-[#0a0908] hover:border-[#b4442e] transition-all duration-300 cursor-pointer overflow-hidden text-left"
+                className="campaign-card group relative p-6 sm:p-8 rounded border border-[#2a2723] bg-[#0a0908] hover:border-[#b4442e] transition-all duration-300 cursor-pointer overflow-hidden text-left"
               >
                 <div className="flex items-center justify-between text-xs font-military tracking-widest text-[#b7ad99]/70">
                   <span className="px-2 py-0.5 rounded border border-[#2a2723] bg-[#12100e]">
