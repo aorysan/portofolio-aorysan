@@ -15,38 +15,46 @@ export const CampaignsJourney: React.FC<{
   onOpenDossier: (campaign: Campaign) => void;
 }> = ({ onOpenDossier }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
 
   const sinaProjects = CAMPAIGNS_DATA.filter((c) => c.wallZone === 'sina');
   const roseProjects = CAMPAIGNS_DATA.filter((c) => c.wallZone === 'rose');
   const mariaProjects = CAMPAIGNS_DATA.filter((c) => c.wallZone === 'maria');
 
   useEffect(() => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function' || !containerRef.current || !trackRef.current) return;
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    if (!containerRef.current) return;
 
     const ctx = gsap.context(() => {
-      const track = trackRef.current;
-      if (!track) return;
-
-      gsap.to(track, {
-        x: () => -(track.scrollWidth - window.innerWidth),
-        ease: 'none',
+      const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
           start: 'top top',
           pin: true,
-          // Required: the trigger's parent (#campaigns) is display:flex, and
-          // ScrollTrigger disables pinSpacing by default inside flex parents
-          // (no spacer padding → pin adds zero scroll length → journey stalls
-          // and the next section overlaps it). Forcing it restores the pin
-          // distance to the page.
           pinSpacing: true,
           scrub: 1,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          end: () => '+=' + (track.scrollWidth - window.innerWidth),
+          end: '+=320%',
         },
       });
+
+      // Zone 1: Wall Sina -> Breach -> Wall Rose
+      tl.to('[data-layer="sina"]', { scale: 1.6, opacity: 0, pointerEvents: 'none', ease: 'none', duration: 1 });
+      tl.fromTo('[data-breach="sina"]', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1.05, ease: 'none', duration: 0.4 }, '<');
+      tl.to('[data-breach="sina"]', { opacity: 0, duration: 0.3 });
+      tl.fromTo('[data-layer="rose"]', { opacity: 0, scale: 0.9, pointerEvents: 'none' }, { opacity: 1, scale: 1, pointerEvents: 'auto', ease: 'none', duration: 0.5 });
+
+      // Zone 2: Wall Rose -> Breach -> Wall Maria
+      tl.to('[data-layer="rose"]', { scale: 1.6, opacity: 0, pointerEvents: 'none', ease: 'none', duration: 1 });
+      tl.fromTo('[data-breach="rose"]', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1.05, ease: 'none', duration: 0.4 }, '<');
+      tl.to('[data-breach="rose"]', { opacity: 0, duration: 0.3 });
+      tl.fromTo('[data-layer="maria"]', { opacity: 0, scale: 0.9, pointerEvents: 'none' }, { opacity: 1, scale: 1, pointerEvents: 'auto', ease: 'none', duration: 0.5 });
+
+      // Zone 3: Wall Maria -> Breach -> Beyond The Walls
+      tl.to('[data-layer="maria"]', { scale: 1.6, opacity: 0, pointerEvents: 'none', ease: 'none', duration: 1 });
+      tl.fromTo('[data-breach="maria"]', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1.05, ease: 'none', duration: 0.4 }, '<');
+      tl.to('[data-breach="maria"]', { opacity: 0, duration: 0.3 });
+      tl.fromTo('[data-layer="beyond"]', { opacity: 0, scale: 0.94, pointerEvents: 'none' }, { opacity: 1, scale: 1, pointerEvents: 'auto', ease: 'none', duration: 1 });
     }, containerRef);
 
     return () => ctx.revert();
@@ -111,83 +119,115 @@ export const CampaignsJourney: React.FC<{
   );
 
   return (
-    <div ref={containerRef} className="relative w-full h-screen overflow-hidden">
-      <div
-        ref={trackRef}
-        className="flex items-center h-full gap-8 px-12 sm:px-24 w-max will-change-transform"
-      >
+    <div ref={containerRef} className="relative w-full" style={{ height: '420vh' }}>
+      <div className="sticky top-0 h-screen overflow-hidden">
         {/* Sina Zone (Oldest / Interior) */}
-        <div className="flex items-center gap-8">
-          <div className="w-72 flex-shrink-0 text-left">
-            <span className="font-military text-xs tracking-[0.25em] text-[#b4442e]">
-              ZONE 01 · INTERIOR
-            </span>
-            <h2 className="font-display text-4xl font-bold text-[#d6cfc2] mt-2">
-              WALL SINA
-            </h2>
-            <p className="font-body text-sm text-[#b7ad99] mt-3">
-              Earliest core architectures and foundations that anchored the journey.
-            </p>
+        <div
+          data-layer="sina"
+          className="absolute inset-0 flex items-center justify-center px-6 sm:px-12 lg:px-24"
+        >
+          <div className="flex items-center gap-8 max-w-7xl w-full justify-center">
+            <div className="w-72 flex-shrink-0 text-left">
+              <span className="font-military text-xs tracking-[0.25em] text-[#b4442e]">
+                ZONE 01 · INTERIOR
+              </span>
+              <h2 className="font-display text-4xl font-bold text-[#d6cfc2] mt-2">
+                WALL SINA
+              </h2>
+              <p className="font-body text-sm text-[#b7ad99] mt-3">
+                Earliest core architectures and foundations that anchored the journey.
+              </p>
+            </div>
+            {sinaProjects.map(renderProjectCard)}
           </div>
-          {sinaProjects.map(renderProjectCard)}
         </div>
 
         {/* Breach 1 */}
-        <WallBreach wallName="WALL SINA" zoneLabel="BREACH PERIMETER I" isBreached />
+        <div
+          data-breach="sina"
+          className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 z-20"
+        >
+          <WallBreach wallName="WALL SINA" zoneLabel="BREACH PERIMETER I" isBreached />
+        </div>
 
         {/* Rose Zone (Mid) */}
-        <div className="flex items-center gap-8">
-          <div className="w-72 flex-shrink-0 text-left">
-            <span className="font-military text-xs tracking-[0.25em] text-[#b4442e]">
-              ZONE 02 · INTERMEDIATE
-            </span>
-            <h2 className="font-display text-4xl font-bold text-[#d6cfc2] mt-2">
-              WALL ROSE
-            </h2>
-            <p className="font-body text-sm text-[#b7ad99] mt-3">
-              Production scale systems and simulation engines deployed under live pressure.
-            </p>
+        <div
+          data-layer="rose"
+          className="absolute inset-0 flex items-center justify-center px-6 sm:px-12 lg:px-24 opacity-0 pointer-events-none"
+        >
+          <div className="flex items-center gap-8 max-w-7xl w-full justify-center">
+            <div className="w-72 flex-shrink-0 text-left">
+              <span className="font-military text-xs tracking-[0.25em] text-[#b4442e]">
+                ZONE 02 · INTERMEDIATE
+              </span>
+              <h2 className="font-display text-4xl font-bold text-[#d6cfc2] mt-2">
+                WALL ROSE
+              </h2>
+              <p className="font-body text-sm text-[#b7ad99] mt-3">
+                Production scale systems and simulation engines deployed under live pressure.
+              </p>
+            </div>
+            {roseProjects.map(renderProjectCard)}
           </div>
-          {roseProjects.map(renderProjectCard)}
         </div>
 
         {/* Breach 2 */}
-        <WallBreach wallName="WALL ROSE" zoneLabel="BREACH PERIMETER II" isBreached />
+        <div
+          data-breach="rose"
+          className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 z-20"
+        >
+          <WallBreach wallName="WALL ROSE" zoneLabel="BREACH PERIMETER II" isBreached />
+        </div>
 
         {/* Maria Zone (Latest) */}
-        <div className="flex items-center gap-8">
-          <div className="w-72 flex-shrink-0 text-left">
-            <span className="font-military text-xs tracking-[0.25em] text-[#b4442e]">
-              ZONE 03 · FRONTIER
-            </span>
-            <h2 className="font-display text-4xl font-bold text-[#d6cfc2] mt-2">
-              WALL MARIA
-            </h2>
-            <p className="font-body text-sm text-[#b7ad99] mt-3">
-              The outer rampart of our software: latest production platforms standing guard.
-            </p>
+        <div
+          data-layer="maria"
+          className="absolute inset-0 flex items-center justify-center px-6 sm:px-12 lg:px-24 opacity-0 pointer-events-none"
+        >
+          <div className="flex items-center gap-8 max-w-7xl w-full justify-center">
+            <div className="w-72 flex-shrink-0 text-left">
+              <span className="font-military text-xs tracking-[0.25em] text-[#b4442e]">
+                ZONE 03 · FRONTIER
+              </span>
+              <h2 className="font-display text-4xl font-bold text-[#d6cfc2] mt-2">
+                WALL MARIA
+              </h2>
+              <p className="font-body text-sm text-[#b7ad99] mt-3">
+                The outer rampart of our software: latest production platforms standing guard.
+              </p>
+            </div>
+            {mariaProjects.map(renderProjectCard)}
           </div>
-          {mariaProjects.map(renderProjectCard)}
         </div>
 
         {/* Breach 3 */}
-        <WallBreach wallName="WALL MARIA" zoneLabel="FINAL PERIMETER BREACH" isBreached />
+        <div
+          data-breach="maria"
+          className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 z-20"
+        >
+          <WallBreach wallName="WALL MARIA" zoneLabel="FINAL PERIMETER BREACH" isBreached />
+        </div>
 
         {/* Beyond The Walls (Horizon) */}
-        <div className="w-[500px] flex-shrink-0 p-12 rounded border border-[#2a2723] bg-gradient-to-r from-[#0a0908] to-[#4d6155]/20 text-left flex flex-col justify-center">
-          <span className="font-military text-xs tracking-[0.3em] text-[#4d6155] uppercase">
-            UNCHARTED TERRITORY
-          </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#d6cfc2] mt-3">
-            BEYOND THE WALLS
-          </h2>
-          <p className="font-body text-sm text-[#b7ad99] mt-4 leading-relaxed">
-            The perimeter ends here. Ahead lies open sea and wild territory where upcoming distributed engines are forged.
-          </p>
+        <div
+          data-layer="beyond"
+          className="absolute inset-0 flex items-center justify-center px-6 sm:px-12 lg:px-24 opacity-0 pointer-events-none"
+        >
+          <div className="w-[500px] flex-shrink-0 p-12 rounded border border-[#2a2723] bg-gradient-to-r from-[#0a0908] to-[#4d6155]/20 text-left flex flex-col justify-center">
+            <span className="font-military text-xs tracking-[0.3em] text-[#4d6155] uppercase">
+              UNCHARTED TERRITORY
+            </span>
+            <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#d6cfc2] mt-3">
+              BEYOND THE WALLS
+            </h2>
+            <p className="font-body text-sm text-[#b7ad99] mt-4 leading-relaxed">
+              The perimeter ends here. Ahead lies open sea and wild territory where upcoming distributed engines are forged.
+            </p>
 
-          <div className="mt-8 flex items-center gap-3 p-3 rounded border border-[#4d6155]/50 bg-[#12100e] text-xs font-military tracking-widest text-[#d6cfc2]">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#4d6155] animate-ping" />
-            <span>⟐ EXPEDITION IN PROGRESS</span>
+            <div className="mt-8 flex items-center gap-3 p-3 rounded border border-[#4d6155]/50 bg-[#12100e] text-xs font-military tracking-widest text-[#d6cfc2]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#4d6155] animate-ping" />
+              <span>⟐ EXPEDITION IN PROGRESS</span>
+            </div>
           </div>
         </div>
       </div>

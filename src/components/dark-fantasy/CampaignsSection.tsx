@@ -31,9 +31,9 @@ export const CampaignsSection: React.FC = () => {
     setSelectedCampaign(null);
   };
 
-  // Fallback: horizontal journey only on large screens without reduced
+  // Fallback: vertical wall-dive only on large screens without reduced
   // motion; otherwise the Phase 1 vertical grid.
-  const showHorizontalJourney = isLargeScreen && !reducedMotion;
+  const showDive = isLargeScreen && !reducedMotion;
 
   return (
     <section
@@ -41,7 +41,7 @@ export const CampaignsSection: React.FC = () => {
       aria-labelledby="campaigns-heading"
       className="relative min-h-screen flex flex-col justify-center z-10 border-t border-[#2a2723]"
     >
-      {showHorizontalJourney ? (
+      {showDive ? (
         <CampaignsJourney onOpenDossier={handleOpenDossier} />
       ) : (
         <div className="px-6 sm:px-12 lg:px-24 py-24">
