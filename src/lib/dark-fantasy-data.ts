@@ -1,3 +1,5 @@
+export type WallZone = 'sina' | 'rose' | 'maria' | 'beyond';
+
 export interface Campaign {
   id: string;
   district: string;
@@ -9,6 +11,8 @@ export interface Campaign {
   github?: string;
   liveLink?: string;
   imageLabel: string;
+  wallZone?: WallZone;
+  era?: 'oldest' | 'mid' | 'newest';
 }
 
 export interface ArsenalQuadrant {
@@ -82,6 +86,8 @@ export const CAMPAIGNS_DATA: Campaign[] = [
     stack: ['Flutter', 'Firebase', 'Dart', 'Cloudinary'],
     github: 'https://github.com/aorysan/jawara_kel3',
     imageLabel: 'kampungku.png',
+    wallZone: 'rose',
+    era: 'mid',
   },
   {
     id: 'campaign-restarea',
@@ -94,6 +100,8 @@ export const CAMPAIGNS_DATA: Campaign[] = [
     github: 'https://github.com/aorysan/rest-area-tycoon',
     liveLink: 'https://itch.io/jam/tsa-gamefest-game-jam/rate/2845746',
     imageLabel: 'Rest Area Tycoon',
+    wallZone: 'rose',
+    era: 'mid',
   },
   {
     id: 'campaign-trasmart',
@@ -106,6 +114,8 @@ export const CAMPAIGNS_DATA: Campaign[] = [
     github: 'https://github.com/aorysan/trasmart-web',
     liveLink: 'https://trasmart-web.vercel.app/',
     imageLabel: 'TrasMart',
+    wallZone: 'maria',
+    era: 'newest',
   },
   {
     id: 'campaign-sarpras',
@@ -117,6 +127,8 @@ export const CAMPAIGNS_DATA: Campaign[] = [
     stack: ['React', 'Node.js', 'Resource Management'],
     github: 'https://github.com/aorysan/Kel6-SarPras',
     imageLabel: 'sarpras.png',
+    wallZone: 'rose',
+    era: 'mid',
   },
   {
     id: 'campaign-framework',
@@ -128,6 +140,8 @@ export const CAMPAIGNS_DATA: Campaign[] = [
     stack: ['Architecture', 'Clean Code', 'TypeScript'],
     github: 'https://github.com/aorysan/frameWork',
     imageLabel: 'framework.png',
+    wallZone: 'sina',
+    era: 'oldest',
   },
   {
     id: 'campaign-jawara',
@@ -139,6 +153,8 @@ export const CAMPAIGNS_DATA: Campaign[] = [
     stack: ['Web Platform', 'Community Management'],
     github: 'https://github.com/aorysan/jawara',
     imageLabel: 'jawara.png',
+    wallZone: 'sina',
+    era: 'oldest',
   },
 ];
 
