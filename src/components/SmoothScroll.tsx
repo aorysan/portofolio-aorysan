@@ -60,11 +60,18 @@ export default function SmoothScroll({
     if (lenisRef.current) {
       lenisRef.current.scrollTo(target, options);
     } else {
+      // Headless/jsdom environments lack scrollIntoView; guard keeps the
+      // no-Lenis fallback (chapter mode, reduced motion) test-safe.
+      // Browser behavior unchanged.
       if (typeof target === 'string') {
         const el = document.querySelector(target);
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        if (el && typeof (el as HTMLElement).scrollIntoView === 'function') {
+          (el as HTMLElement).scrollIntoView({ behavior: 'smooth' });
+        }
       } else if (target instanceof HTMLElement) {
-        target.scrollIntoView({ behavior: 'smooth' });
+        if (typeof target.scrollIntoView === 'function') {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
       }
     }
   };
