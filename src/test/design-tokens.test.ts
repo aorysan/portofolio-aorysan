@@ -2,26 +2,32 @@ import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 
-describe('Design Tokens and Styling Setup', () => {
-  it('should include Orbitron font in index.html', () => {
-    const html = fs.readFileSync(path.resolve(__dirname, '../../index.html'), 'utf-8');
-    expect(html).toContain('Orbitron:wght@400;500;600;700;800;900');
+describe('Design Tokens & CSS Configuration', () => {
+  it('defines all required Dark Fantasy color variables in index.css without overwriting HSL channels with hex', () => {
+    const cssContent = fs.readFileSync(path.resolve(__dirname, '../index.css'), 'utf-8');
+    expect(cssContent).toContain('--color-ash: #0a0908');
+    expect(cssContent).toContain('--color-soot: #12100e');
+    expect(cssContent).toContain('--color-iron: #1c1a17');
+    expect(cssContent).toContain('--color-stone: #2a2723');
+    expect(cssContent).toContain('--color-bone: #d6cfc2');
+    expect(cssContent).toContain('--color-parchment: #b7ad99');
+    expect(cssContent).toContain('--color-blood: #7c1f1a');
+    expect(cssContent).toContain('--color-ember: #b4442e');
+    expect(cssContent).toContain('--color-rust: #8a4b2b');
+    expect(cssContent).toContain('--color-verdigris: #4d6155');
+
+    // index.css:392-393 bug fix: ensure --background is not overwritten with hex in :root
+    expect(cssContent).not.toContain('--background: var(--color-ash);');
+    expect(cssContent).not.toContain('--foreground: var(--color-bone);');
   });
 
-  it('should define the 3-accent sci-fi palette variables in index.css', () => {
-    const css = fs.readFileSync(path.resolve(__dirname, '../index.css'), 'utf-8');
-    expect(css).toContain('--void: #0A0A0F');
-    expect(css).toContain('--green: #00FF88');
-    expect(css).toContain('--cyan: #00D4FF');
-    expect(css).toContain('--magenta: #FF00FF');
-    expect(css).toContain('--gold: #FFD700');
-  });
-
-  it('should define chamfer and glow utilities in gamified.css', () => {
-    const gamifiedCss = fs.readFileSync(path.resolve(__dirname, '../styles/gamified.css'), 'utf-8');
-    expect(gamifiedCss).toContain('.chamfer');
-    expect(gamifiedCss).toContain('.chamfer-sm');
-    expect(gamifiedCss).toContain('.glow-green');
-    expect(gamifiedCss).toContain('.void-grid');
+  it('verifies tailwind.config.ts exposes dark fantasy colors mapped to CSS variables', () => {
+    const tailwindConfig = fs.readFileSync(path.resolve(__dirname, '../../tailwind.config.ts'), 'utf-8');
+    expect(tailwindConfig).toContain("ash: 'var(--color-ash)'");
+    expect(tailwindConfig).toContain("soot: 'var(--color-soot)'");
+    expect(tailwindConfig).toContain("stone: 'var(--color-stone)'");
+    expect(tailwindConfig).toContain("bone: 'var(--color-bone)'");
+    expect(tailwindConfig).toContain("ember: 'var(--color-ember)'");
+    expect(tailwindConfig).toContain("verdigris: 'var(--color-verdigris)'");
   });
 });

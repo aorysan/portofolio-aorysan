@@ -26,4 +26,9 @@ dist-ssr
 # Worktrees and Agent artifacts
 .worktrees/
 .superpowers/
+
+# Media assets generated locally (large raws ignored, shipped loop explicitly allowed)
+public/videos/*.raw.mp4
+public/videos/*.mp4
+!public/videos/vision-sea-loop.mp4
 

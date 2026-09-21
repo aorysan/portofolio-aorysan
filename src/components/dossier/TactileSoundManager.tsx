@@ -12,6 +12,15 @@ const STORAGE_KEY = 'dossier_sound_muted';
 
 let sharedAudioContext: AudioContext | null = null;
 
+function isSoundMuted(): boolean {
+  try {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return false;
+    return localStorage.getItem(STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
 export function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   const AudioCtx =
@@ -168,10 +177,7 @@ function playPenClick(ctx: AudioContext) {
 }
 
 export function playTactileSound(type: TactileSoundType) {
-  if (
-    typeof window !== 'undefined' &&
-    localStorage.getItem(STORAGE_KEY) === 'true'
-  ) {
+  if (isSoundMuted()) {
     return;
   }
 
@@ -205,11 +211,7 @@ const TactileSoundContext = createContext<TactileSoundContextValue>({
 });
 
 export const TactileSoundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isMuted, setIsMuted] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved !== null ? saved === 'true' : false;
-  });
+  const [isMuted, setIsMuted] = useState<boolean>(() => isSoundMuted());
 
   useEffect(() => {
     try {

@@ -27,9 +27,10 @@ export const DossierBerkas: React.FC<DossierBerkasProps> = ({ onNavigateToProjec
         // Safe fallback in minimal environments
       }
       playSound('stampThud');
+      const stampEl = stampRef.current;
       return () => {
-        if (stampRef.current) {
-          anime.remove(stampRef.current);
+        if (stampEl) {
+          anime.remove(stampEl);
         }
       };
     }
@@ -48,10 +49,11 @@ export const DossierBerkas: React.FC<DossierBerkasProps> = ({ onNavigateToProjec
     } catch {
       // Graceful fallback for non-DOM environments
     }
+    const stampEl = stampRef.current;
 
     return () => {
-      if (stampRef.current) {
-        anime.remove(stampRef.current);
+      if (stampEl) {
+        anime.remove(stampEl);
       }
     };
   }, [playSound]);
