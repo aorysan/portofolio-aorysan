@@ -55,7 +55,11 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    /* Lenis owns smoothing on this page; `smooth` here double-animates
+       programmatic scrollTo and overshoots anchors (rail click lands past
+       the target). Fallbacks use scrollIntoView({behavior:'smooth'}) which
+       works regardless of this rule. */
+    scroll-behavior: auto;
   }
 }
 

@@ -1,18 +1,40 @@
 # Dark Fantasy Portfolio Design Spec: Beyond The Walls
 
-## Overview
+## 0. Status & Scope (added — spec vs reality sync)
 
-Transform the existing gamified expedition dossier portfolio into a cinematic **Dark Fantasy** single-page portfolio inspired by the "Survey Corps of Software" theme. The site will be a vertically-scrollable landing page with Lenis smooth scrolling, GSAP ScrollTrigger-driven cinematic animations, Anime.js micro-interactions, and an interactive **Three Walls horizontal journey** for the projects section.
+> Review 2026-09-20: spec asli ditulis seolah implementasi belum ada.
+> Realita saat ini: `DarkFantasyShell` **sudah shipped** di `src/components/dark-fantasy/`,
+> `SmoothScroll` (Lenis) **sudah real** (bukan no-op), `src/lib/dark-fantasy-data.ts` **sudah ada**.
+> Spec ini di-improve agar jadi source of truth: bagian SHIPPED = jangan diulang,
+> bagian PLANNED = Three Walls horizontal journey + GSAP scroll choreography.
 
-**Theme**: Dark, atmospheric, medieval-military aesthetic. Every UI element carries the metaphor of a fortified world — walls to breach, expeditions to undertake, and territories to map.
+**SHIPPED (jangan re-implement):**
+- `src/pages/Index.tsx` → `TactileSoundProvider` + `DarkFantasyShell` (bukan `DossierShell`)
+- `src/App.tsx` → single `SmoothScroll` wrapper di top level (jangan pindah/duplikat ke shell)
+- `src/components/dark-fantasy/` → `DarkFantasyShell, TacticalHeader, NavRail, HeroSection, CreedSection, ArsenalSection, CampaignsSection, VisionSection, SummonSection, DarkFantasyFooter, EmberCanvas, CampaignDossierModal`
+- `src/lib/dark-fantasy-data.ts` → `HERO_DATA, CREED_DATA, ARSENAL_DATA, CAMPAIGNS_DATA, SUMMON_DATA`
+- `src/index.css` → font import Cinzel/Oswald/Barlow + `:root` dark-fantasy tokens (sudah ada)
+- `CampaignsSection` saat ini = **responsive grid + modal** (bukan horizontal journey)
+- `SummonSection` saat ini = **mailto + sonner toast** (bukan backend form)
+- `HeroSection` saat ini = **anime.js** entrance saja (belum ada GSAP ScrollTrigger)
 
-**Target**: Replace the current `DossierShell` entry point with a new `DarkFantasyShell` that renders all sections as a continuous scroll experience.
+**PLANNED (sisa pekerjaan spec ini):**
+1. GSAP ScrollTrigger choreography (hero recession, creed pin-reveal, vision parallax)
+2. Three Walls horizontal journey sebagai **Phase 2** dengan fallback ke grid Phase 1
+3. Reusable `TextScramble` + `WallBreach` + hooks (`useScrollReveal`, `useTextSplit`)
+4. Lenis ↔ GSAP sync yang benar + chapter/fluid mode contract
+5. A11y hardening (focus trap modal, reduced-motion, kontras) + perf budget
+
+**Konvensi penamaan (fix dari spec lama):**
+- Spec lama memakai `darkfantasy/DFHero/DFHeader/...` — **SALAH**.
+- Yang benar: `src/components/dark-fantasy/` + `HeroSection, TacticalHeader, ...` (kebab-case folder, PascalCase `*Section`).
+- `DossierLightbox` → nama aktual `CampaignDossierModal`. Jangan rename tanpa migrasi test.
 
 ---
 
 ## 1. Design Tokens & Typography
 
-### 1.1 Color Palette (CSS custom properties in `@theme`)
+### 1.1 Color Palette
 
 | Token | Hex | Usage |
 |-------|-----|-------|
@@ -27,6 +49,32 @@ Transform the existing gamified expedition dossier portfolio into a cinematic **
 | `--color-rust` | `#8a4b2b` | Tertiary warm accent |
 | `--color-verdigris` | `#4d6155` | Cool accent (Beyond zone fog hints) |
 
+**Fix dari spec lama:** proyek ini Tailwind **v3** (`tailwind.config.ts`), bukan v4.
+Jangan pakai `@theme`. Integrasi yang benar:
+
+1. `src/index.css` `:root` menyimpan vars di atas (SUDAH ADA — jangan duplikat).
+2. `tailwind.config.ts → theme.extend.colors` map ke vars agar bisa dipakai sebagai utility:
+   ```ts
+   colors: {
+     ash: 'var(--color-ash)',
+     soot: 'var(--color-soot)',
+     iron: 'var(--color-iron)',
+     stone: 'var(--color-stone)',
+     bone: 'var(--color-bone)',
+     parchment: 'var(--color-parchment)',
+     blood: 'var(--color-blood)',
+     ember: 'var(--color-ember)',
+     rust: 'var(--color-rust)',
+     verdigris: 'var(--color-verdigris)',
+   }
+   ```
+   Sampai ini dikerjakan, kode boleh tetap pakai arbitrary values (`bg-[#0a0908]`) — itu yang dipakai sekarang.
+3. **[P0 — TODO di kode]** Hapus/perbaiki `index.css:392-393`: dua baris itu menimpa channel HSL (`--background: 240 20% 5%`) dengan hex (`var(--color-ash)`), sementara `tailwind.config.ts` memakai `hsl(var(--background))` → `hsl(#0a0908)` = warna invalid. Akibatnya `bg-background`/`text-foreground` dkk (shadcn, toaster, tooltip) rusak. Fix: hapus kedua baris override itu (kembalikan channel HSL semula) DAN pakai token dark-fantasy via `extend.colors` di poin 2 (`bg-ash text-bone`) untuk komponen dark-fantasy. Jangan campur dua sistem di satu elemen.
+
+**Kontras (angka di bawah ESTIMASI — wajib ukur ulang dengan DevTools contrast checker sebelum close):** `--color-parchment #b7ad99` di atas `--color-ash #0a0908` ≈ 7–9:1 — OK untuk body.
+`--color-ember #b4442e` di atas ash ≈ 3:1 (klaim lama "4+:1" overstate) — hanya untuk large text (≥18pt / 14pt bold) dan aksen non-teks. JANGAN untuk label kecil seperti `03 — CAMPAIGNS` 12px (gagal 4.5:1); label kecil pakai parchment, ember hanya sebagai dot/underline/glow pendamping.
+`--color-stone #2a2723` untuk teks kecil di atas ash **GAGAL** kontras — hanya untuk border/dekoratif (footer saat ini pakai stone untuk teks — perbaiki ke parchment/60%).
+
 ### 1.2 Typography (Google Fonts `@import`)
 
 | Role | Font | Weights | Usage |
@@ -35,15 +83,26 @@ Transform the existing gamified expedition dossier portfolio into a cinematic **
 | Military | `Oswald` | 300, 400, 500, 600, 700 | Section labels, nav items, badges, form labels, footer |
 | Body | `Barlow` | 300, 400, 500, 600 | Paragraphs, descriptions, form inputs |
 
+Status: import font di `src/index.css:1` SUDAH BENAR. `tailwind.config.ts` sudah map `display/military/body`. Gunakan `font-display/font-military/font-body`, bukan `font-cinzel` custom.
+
 ### 1.3 Global Styles
 
-- `background-color: var(--color-ash)`
-- `color: var(--color-bone)`
-- `font-family: var(--font-body)` (Barlow)
-- `-webkit-font-smoothing: antialiased`
-- `overflow-x: hidden`
-- `::selection { background: var(--color-blood) }`
-- Hidden scrollbar by default, visible on scroll (CSS `::-webkit-scrollbar` with `--color-stone`)
+- `background-color: var(--color-ash)`; `color: var(--color-bone)`; `font-family: Barlow`
+- `-webkit-font-smoothing: antialiased`; `overflow-x: hidden` (di `body`, bukan tiap section)
+- `::selection { background: var(--color-blood); color: var(--color-bone) }`
+- Scrollbar: `::-webkit-scrollbar` track soot + thumb stone, hover ember. Jangan hidden-by-default (spec lama ambigu) — pakai thin styled scrollbar agar discoverable.
+- `html { scroll-behavior: auto }` saat Lenis aktif (Lenis mengontrol easing sendiri). `smooth` hanya sebagai fallback saat Lenis nonaktif / reduced-motion.
+
+### 1.4 Z-index scale (baru — cegah stacking bug)
+
+| Layer | z | Isi |
+|-------|---|-----|
+| base | 0–10 | Sections (`z-10` pada section agar di atas canvas) |
+| canvas | 1 | `EmberCanvas` (`fixed, pointer-events-none, z-[1]`) |
+| header | 50 | `TacticalHeader` |
+| nav rail | 40 | `NavRail` |
+| modal | 90 | `CampaignDossierModal` overlay + panel — **[TODO di kode]** saat ini `z-50` (`CampaignDossierModal.tsx:24`), sama dengan header. Naikkan ke `z-[90]` agar di atas header/nav rail. |
+| toast | 100 | sonner `Toaster` |
 
 ---
 
@@ -51,360 +110,278 @@ Transform the existing gamified expedition dossier portfolio into a cinematic **
 
 ```
 App.tsx
-└── ThemeProvider (forced dark)
-    └── DarkFantasyShell
-        ├── LenisProvider (smooth scroll wrapper)
-        ├── DFHeader (fixed top HUD bar)
-        ├── DFNavRail (fixed right-side vertical nav)
-        ├── EmberCanvas (full-viewport 2D particle background)
-        ├── <main>
-        │   ├── DFHero (#home)
-        │   ├── DFCreed (#creed)
-        │   ├── DFArsenal (#arsenal)
-        │   ├── DFCampaigns (#campaigns) — Three Walls Journey
-        │   ├── DFVision (#vision)
-        │   └── DFSummon (#summon)
-        ├── DFFooter
-        └── DossierLightbox (portal modal for project details)
+└── SmoothScroll (SATU-SATUNYA instance Lenis, di top level)
+    └── ThemeProvider (forced dark)
+        └── Index.tsx
+            └── TactileSoundProvider
+                └── DarkFantasyShell (mode: fluid | chapter)
+                    ├── EmberCanvas (fixed, z-1)
+                    ├── TacticalHeader (fixed HUD)
+                    ├── NavRail (fixed right)
+                    ├── <main>
+                    │   ├── HeroSection (#home)
+                    │   ├── CreedSection (#creed)
+                    │   ├── ArsenalSection (#arsenal)
+                    │   ├── CampaignsSection (#campaigns) — Phase 1: grid
+                    │   │   └── CampaignDossierModal (portal)
+                    │   ├── VisionSection (#vision)
+                    │   └── SummonSection (#summon)
+                    └── DarkFantasyFooter (fluid mode saja)
 ```
 
-### 2.1 New Files
+### 2.1 File map — aktual vs rencana
 
-| File | Purpose |
-|------|---------|
-| `src/components/darkfantasy/DarkFantasyShell.tsx` | Root shell: Lenis, header, nav rail, ember canvas, sections |
-| `src/components/darkfantasy/DFHeader.tsx` | Fixed top HUD: logo, reg number, audio toggle |
-| `src/components/darkfantasy/DFNavRail.tsx` | Fixed right-side vertical section indicators |
-| `src/components/darkfantasy/DFHero.tsx` | Hero: "BEYOND THE WALLS" + scroll indicator |
-| `src/components/darkfantasy/DFCreed.tsx` | Manifesto: pinned word reveal + stats |
-| `src/components/darkfantasy/DFArsenal.tsx` | 2x2 skill cards with SVG sigils |
-| `src/components/darkfantasy/DFCampaigns.tsx` | Three Walls horizontal journey (pinned) |
-| `src/components/darkfantasy/DFVision.tsx` | Parallax quote + 3 horizon goals |
-| `src/components/darkfantasy/DFSummon.tsx` | Contact form + dispatch details |
-| `src/components/darkfantasy/DFFooter.tsx` | Footer bar |
-| `src/components/darkfantasy/EmberCanvas.tsx` | 2D canvas particle system (floating embers) |
-| `src/components/darkfantasy/DossierLightbox.tsx` | Modal for expanded project details |
-| `src/components/darkfantasy/WallBreach.tsx` | Wall breach crack + debris animation component |
-| `src/components/darkfantasy/TextScramble.tsx` | Reusable text decode/scramble effect |
-| `src/hooks/useScrollReveal.ts` | Hook: IntersectionObserver + GSAP/Anime reveal |
-| `src/hooks/useLenisScroll.ts` | Hook: access Lenis instance, scrollTo, progress |
-| `src/hooks/useTextSplit.ts` | Hook: split text into span-wrapped letters/words for animation |
-| `src/lib/darkFantasyData.ts` | Centralized content data adapted for Aryo's profile |
+| File aktual (kebab-case) | Status | Catatan |
+|------|--------|---------|
+| `src/components/dark-fantasy/DarkFantasyShell.tsx` | SHIPPED | Punya dual mode `fluid \| chapter` — spec lama tidak mendokumentasikan, lihat §2.4 |
+| `src/components/dark-fantasy/TacticalHeader.tsx` | SHIPPED | = `DFHeader` di spec lama |
+| `src/components/dark-fantasy/NavRail.tsx` | SHIPPED | = `DFNavRail` |
+| `src/components/dark-fantasy/HeroSection.tsx` | SHIPPED | = `DFHero`, anime.js only |
+| `src/components/dark-fantasy/CreedSection.tsx` | SHIPPED | = `DFCreed`, statik |
+| `src/components/dark-fantasy/ArsenalSection.tsx` | SHIPPED | = `DFArsenal`, statik |
+| `src/components/dark-fantasy/CampaignsSection.tsx` | SHIPPED (Phase 1) | Grid + modal. Horizontal journey = Phase 2, lihat §3.6 |
+| `src/components/dark-fantasy/VisionSection.tsx` | SHIPPED | Statik |
+| `src/components/dark-fantasy/SummonSection.tsx` | SHIPPED | mailto + toast |
+| `src/components/dark-fantasy/DarkFantasyFooter.tsx` | SHIPPED | Perbaiki kontras teks (§1.1) |
+| `src/components/dark-fantasy/EmberCanvas.tsx` | SHIPPED | Sudah ada reduced-motion + jsdom guard |
+| `src/components/dark-fantasy/CampaignDossierModal.tsx` | SHIPPED partial | Struktur + `Escape` + `aria-modal` ada. BELUM ada: focus trap, focus restore, `lenis.stop()`, body scroll-lock, `z-[90]` (lihat §1.4, §7). Lengkapi sebelum Phase 2. |
+| `src/lib/dark-fantasy-data.ts` | SHIPPED | = `darkFantasyData.ts` spec lama (kebab-case!) |
+| `src/components/SmoothScroll.tsx` | SHIPPED | Sudah real Lenis + `useLenisContext` |
 
-### 2.2 Modified Files
+| File rencana (baru) | Prioritas | Purpose |
+|------|-----------|---------|
+| `src/components/dark-fantasy/TextScramble.tsx` | P1 | Reusable runic decode effect (ganti duplikasi anime.js per section) |
+| `src/components/dark-fantasy/WallBreach.tsx` | P2 | Crack + debris untuk Phase 2 horizontal journey |
+| `src/components/dark-fantasy/CampaignsJourney.tsx` | P2 | Phase 2 horizontal journey (terpisah dari grid Phase 1) |
+| `src/hooks/useScrollReveal.ts` | P1 | IntersectionObserver + GSAP reveal sekali pakai, dengan cleanup |
+| `src/hooks/useTextSplit.ts` | P1 | Split words/chars ke spans (untuk creed pin-reveal) |
+| `src/hooks/useReducedMotion.ts` | P1 | Single source `matchMedia('(prefers-reduced-motion: reduce)')` |
 
-| File | Change |
-|------|--------|
-| `src/pages/Index.tsx` | Replace `DossierShell` with `DarkFantasyShell` |
-| `src/components/SmoothScroll.tsx` | Implement real Lenis initialization |
-| `src/index.css` | Replace/extend theme tokens with dark fantasy palette |
-| `src/App.tsx` | Minimal — routing stays, Lenis wrapper moves into shell |
+**JANGAN buat** `src/hooks/useLenisScroll.ts` terpisah — `useLenisContext` dari `SmoothScroll.tsx` sudah memenuhi. Duplikasi accessor = dua source of truth.
+
+### 2.2 Aturan Lenis — single instance (fix kritis spec lama)
+
+Spec lama §2.2/§5 menyuruh "Lenis wrapper moves into shell" — **JANGAN**.
+`App.tsx` sudah membungkus semuanya dengan `<SmoothScroll>`. Menambah Lenis di shell = 2 RAF loop, scroll ganda, ScrollTrigger rusak.
+
+Kontrak:
+- Satu instance Lenis, dimiliki `SmoothScroll.tsx`, di top level `App.tsx`.
+- `DarkFantasyShell` MENGONSUMSI via `useLenisContext().scrollTo`, tidak membuat instance baru.
+- Chapter mode: `<SmoothScroll enabled={mode === 'fluid'}>` (sudah begitu) — Lenis destroy saat chapter, restore saat fluid.
+- `CampaignDossierModal` open → `lenis.stop()`; close → `lenis.start()` (ganti "pause" ambigu di spec lama).
+
+Sync Lenis ↔ GSAP yang benar (belum ada di kode — wajib sebelum animasi §3.3/§3.4/§3.6 diimplementasikan).
+PENTING: integrasikan ke dalam `SmoothScroll.tsx` (instance miliknya), JANGAN membuat `new Lenis` di file lain:
+
+```ts
+// Di dalam SmoothScroll.tsx — GANTI rAF loop yang ada, jangan duplikat:
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+gsap.registerPlugin(ScrollTrigger);
+
+lenis.on('scroll', ScrollTrigger.update);
+const tick = (time: number) => lenis.raf(time * 1000);
+gsap.ticker.add(tick);
+gsap.ticker.lagSmoothing(0);
+// cleanup: gsap.ticker.remove(tick); lenis.destroy();
+```
+
+`ScrollTrigger.getAll().forEach(t => t.kill())` hanya di cleanup unmount root, bukan per section (section pakai `ctx.revert()`, lihat §7).
+Tanpa pola ini, semua `pin + scrub` akan jitter/desync. Menjalankan rAF loop lama + `gsap.ticker` bersamaan = double-drive (Lenis maju 2×) — pastikan hanya satu driver.
 
 ### 2.3 Preserved Files
 
-All existing `dossier/`, `gamified/`, `portfolio/` components remain untouched (not deleted). Only the entry point in `Index.tsx` changes. This allows reverting if needed.
+`dossier/`, `gamified/`, `portfolio/` tetap ada, tidak dihapus. Entry point tetap `Index.tsx`.
+
+### 2.4 Fluid vs Chapter mode (baru — didokumentasikan karena sudah ada di kode)
+
+`DarkFantasyShell` punya `mode: 'fluid' | 'chapter'` yang spec lama abaikan total:
+- `fluid` = continuous scroll (pengalaman utama, SEO-friendly, default).
+- `chapter` = presentation deck (satu section per viewport, wheel/keys/swipe navigasi, body overflow hidden).
+- Semua animasi ScrollTrigger **hanya aktif di fluid**. Di chapter mode: matikan pin/scrub, pakai fade-in sederhana.
+- Anchor `#creed` dkk hanya valid di fluid. Di chapter, `NavRail` memanggil `goToChapter(i)`, bukan `scrollTo`.
+- Spec animasi §3 di bawah berlaku untuk **fluid**. Jika menulis test, uji kedua mode.
+- **Mekanisme penonaktifan [TODO]:** section tidak menerima `mode` saat ini, sehingga ScrollTrigger yang dibuat di dalam section akan rusak di chapter mode (pin di dalam container `overflow-y-auto` + body hidden). Sebelum implementasi §3: sediakan `ChapterModeContext` (atau prop `scrollFXEnabled`) dari `DarkFantasyShell` — section hanya init ScrollTrigger bila `mode === 'fluid'`; bila chapter, pakai fade-in sederhana. Tanpa ini, Phase 2 dilarang masuk chapter deck.
 
 ---
 
 ## 3. Section Designs
 
-### 3.1 DFHeader (Fixed Top HUD)
+Kepemilikan animasi (baru — cegah over-engineering):
+- **Hover/micro**: CSS transitions saja. Anime.js hanya untuk scramble/decode teks.
+- **Entrance sekali**: `useScrollReveal` (IO + CSS class) atau anime.js. GSAP hanya jika perlu scrub/pin/stagger kompleks.
+- **Scroll-driven (scrub/pin/parallax)**: GSAP ScrollTrigger saja, dengan pola §2.2 + cleanup.
 
-- **Position**: `fixed`, top, full width, `z-index: 50`
-- **Background**: transparent → `var(--color-ash)` with blur on scroll (via Lenis scroll callback)
-- **Left**: `A.PUTRO` — font Oswald 500, letter-spacing `0.3em`, color `--color-parchment`
-- **Right**: `PORTFOLIO — REG. NO. 104` — font Oswald 400, color `--color-parchment` at 50% opacity
-- **Audio toggle**: Volume icon (lucide), toggles `TactileSoundManager` mute state
+### 3.1 TacticalHeader (Fixed Top HUD) — SHIPPED, polish saja
 
-### 3.2 DFNavRail (Fixed Right-Side Navigation)
+- `fixed` top full width `z-50`; transparent → ash + blur on scroll (via Lenis scroll callback atau IO sentinel).
+- Kiri: callsign. Kanan: `REG. NO. 104`. Audio toggle (lucide Volume) → `TactileSoundManager` mute.
+- **Callsign (diputuskan final — lihat §6):** tetap `Aryo A.P` sesuai `HERO_DATA.callsign` dan test regex `/Aryo A\.P/i`. `A.PUTRO` hanya diizinkan sebagai alias pendek di HUD bila ruang sempit, tanpa mengubah data maupun test. Jangan rename sebelum migrasi test.
+- Tambah: `aria-pressed` pada audio toggle; mode toggle fluid/chapter harus punya `aria-pressed` + label jelas.
 
-- **Position**: `fixed`, right side, vertically centered, `z-index: 40`
-- **Items**: Vertical list of section indicators:
-  - `00 // HOME`
-  - `01 // CREED`
-  - `02 // ARSENAL`
-  - `03 // CAMPAIGNS`
-  - `04 // VISION`
-  - `05 // SUMMON`
-- **Style**: Font Oswald 300, rotated 90deg (`writing-mode: vertical-rl`), letter-spacing wide
-- **Active state**: Current section text color changes `--color-parchment` → `--color-ember`, dot indicator glows
-- **Detection**: IntersectionObserver on each section, updates active index
-- **Hidden on mobile**: `display: none` below ~1000px breakpoint
+### 3.2 NavRail — SHIPPED, polish saja
 
-### 3.3 DFHero (`#home`)
+- 6 item (`HOME/CREED/ARSENAL/CAMPAIGNS/VISION/SUMMON`), active = ember + glow dot.
+- Deteksi: IO per section. Hidden < 1000px.
+- Sudah `<button>` + `aria-label` (`NavRail.tsx:24-28`) — pertahankan. **[TODO]** tambah `aria-current="true"` pada item aktif.
 
-**Content:**
-- Subtitle badge: `— SURVEY CORPS OF SOFTWARE` (Oswald, `--color-ember`, with horizontal rule left)
-- Headline line 1: `BEYOND` — Cinzel 900, ~12vw, `--color-bone`, solid fill
-- Headline line 2: `THE WALLS` — Cinzel 900, ~12vw, `--color-bone` at ~20% opacity OR `-webkit-text-stroke` outline effect (semi-transparent, ghostly)
-- Sub-paragraph: *"I am a frontend engineer who builds interfaces for a world that keeps trying to end. Where others see the horizon as a boundary, I read it as a brief."* — Barlow 300, `--color-parchment`, max-width 600px
-- Scroll indicator (bottom center): Chevron-down icon + `ADVANCE` (Oswald, letter-spacing wide)
-- Quote (bottom right): *"IF WE DON'T FIGHT, WE CAN'T WIN." — THE ONLY DOCTRINE THAT EVER SHIPPED.* — Barlow italic, `--color-parchment` at 40% opacity, small text
+### 3.3 HeroSection (`#home`) — SHIPPED entrance, PLANNED recession/parallax
 
-**Animations:**
-1. **Letter Carving Reveal** (GSAP): Each letter of "BEYOND" and "THE WALLS" enters from below with `clipPath: inset(100% 0 0 0)` → `inset(0%)`, stagger 0.04s, easing `power4.out`, total ~1.2s
-2. **Subtitle Slide** (GSAP): Badge slides from left `x: -30 → 0`, `opacity: 0 → 1`, delay after headline
-3. **Sub-paragraph Fade** (GSAP): `y: 20 → 0`, `opacity: 0 → 1`, delay 800ms
-4. **Parallax Fog Layers** (GSAP ScrollTrigger scrub): 3 semi-transparent gradient divs move at different `yPercent` speeds on scroll
-5. **Hero Recession** (GSAP ScrollTrigger scrub): As user scrolls past hero, headline `scale: 1 → 0.85`, `opacity: 1 → 0`
-6. **Scroll Indicator Bounce** (Anime.js): `translateY` oscillation, infinite loop, `easeInOutSine`
-7. **Cursor Magnetic Pull** (GSAP `quickTo`): "ADVANCE" button subtly follows cursor position
+Konten aktual (pertahankan): tagline, `BEYOND` solid + `THE WALLS` outline (`-webkit-text-stroke: 2px`), sub-paragraph, `ADVANCE` button + doctrine quote.
 
-### 3.4 DFCreed (`#creed`)
+Animasi:
+1. Letter entrance — SHIPPED (anime.js stagger). Pertahankan + bungkus try/catch + reduced-motion guard (sudah ada).
+2. ~~Cursor Magnetic Pull (GSAP quickTo)~~ — HAPUS dari spec. Biaya vs manfaat buruk di mobile; hover magnet tidak relevan untuk CTA scroll. Ganti: scale + border glow CSS on hover (sudah ada).
+3. **PLANNED** Hero Recession (GSAP scrub): headline `scale 1→0.85, opacity 1→0` saat scroll keluar. Nonaktifkan di chapter mode + reduced-motion.
+4. **PLANNED** Fog parallax: max 2 layer (spec lama bilang 3 — kurangi untuk perf), `yPercent` berbeda, `will-change: transform`, nonaktif di reduced-motion.
 
-**Content:**
-- Section header: `01 — THE CREED` (Oswald)
-- Main quote (large): *"I DEDICATE MY HEART TO INTERFACES THAT REFUSE TO FALL — BUILT WITH THE DISCIPLINE OF A SOLDIER AND THE RESTRAINT OF A CARTOGRAPHER."* — Cinzel 400 italic, ~2.5rem, `--color-bone`
-- Two-column narrative (asymmetric grid):
-  - Left: *"For two years I've operated at the front line of product engineering, turning impossible briefs into shipped territory. My work lives where design ambition meets the brutal constraints of the real: latency, scale, and the human on the other side of the screen who is very tired."*
-  - Right: *"I believe an interface is a fortification — every component a wall, every interaction a gate that must hold. I build slowly enough to be certain, and fast enough to matter. Nothing ships that I would not defend."*
-  - Font Barlow 300/400, `--color-parchment`, line-height 1.8
-- Stats row (3-column grid):
-  - `2+` YEARS ENLISTED
-  - `6+` SYSTEMS FIELDED
-  - `∞` WALLS BREACHED
-  - Numbers: Cinzel 700, ~4rem, `--color-bone`. Labels: Oswald uppercase, `--color-parchment`
+Acceptance: LCP < 2.5s (headline adalah LCP — jangan animate `filter`/blur padanya).
 
-**Animations:**
-1. **Pinned Word-by-Word Reveal** (GSAP ScrollTrigger `pin + scrub`): Section is pinned. Each word of the main quote transitions from `opacity: 0.15` → `opacity: 1` progressively as user scrolls. Like ink appearing on parchment.
-2. **Section Header Decode** (Anime.js): "01 — THE CREED" text scrambles from runic characters and resolves, ~500ms
-3. **Paragraph Columns Fade** (GSAP): Left column `y: 30 → 0, opacity: 0 → 1`, right column follows with 200ms delay
-4. **Hairline Border Draw** (GSAP): Divider lines `scaleX: 0 → 1, transformOrigin: left`
-5. **Stats Counter Roll** (GSAP): Numbers animate count-up from 0 (slot-machine style). Infinity symbol fades in directly.
+### 3.4 CreedSection (`#creed`) — PLANNED pin-reveal
 
-### 3.5 DFArsenal (`#arsenal`)
+Konten: header `01 — THE CREED`, quote Cinzel, 2 kolom narasi, stats row.
+**Drift:** data aktual `CREED_DATA.stats = 02+ / 06+ / 100% MISSION RELIABILITY`. Spec lama bilang `2+ / 6+ / ∞`. Putuskan: `∞ WALLS BREACHED` lebih tematik tapi tidak kredibel untuk hiring; `100% MISSION RELIABILITY` juga tidak verifiable. Rekomendasi: `02+ YEARS / 06+ SYSTEMS / NN PARTNERS` dengan NN = jumlah klien/org yang benar-benar bisa dipertanggungjawabkan. Jangan ship `∞`/`100%` tanpa basis.
 
-**Content:**
-- Section header: `02 — THE ARSENAL` (Oswald)
-- Intro text (right-aligned): *"Four disciplines, sharpened over a career of sieges. Hover to bring each blade to the light."* — Barlow 300, `--color-parchment`
-- 2x2 grid of skill cards:
+Animasi:
+1. **Pinned word reveal** (GSAP `pin + scrub`): kata `opacity 0.15→1` progresif. Wajib `invalidateOnRefresh`, `end: '+=120%'`, matikan pin di <768px (ganti IO stagger biasa — pin vertikal di mobile sempit = jebakan scroll).
+2. Header decode → pakai `TextScramble` reusable (baru), bukan duplikasi anime.js per section.
+3. Stats counter: count-up hanya untuk numerik (`02+`, `06+`); simbol non-numerik fade-in. Trigger sekali (`once: true`), hormati reduced-motion (tampilkan final langsung).
 
-| Card | Number | Title | Description | Sigil |
-|------|--------|-------|-------------|-------|
-| I | `/ I` | FRONTEND VERTICAL MANEUVER | React, Next.js, TypeScript, TailwindCSS — built to strike fast and hold ground under load. | Shield/Home icon |
-| II | `/ II` | SYSTEMS & ARCHITECTURE | Node.js, Express, Firebase, PostgreSQL — component fortresses that survive the breach of scale. | Fortress icon |
-| III | `/ III` | INTERFACE RECONNAISSANCE | Git, Vercel, Figma, Unity — mapping the terrain before the assault. | Crosshair/Globe icon |
-| IV | `/ IV` | PERFORMANCE WARFARE | GSAP, Lenis, Anime.js, Core Web Vitals — sharpened to a killing edge. | Lightning icon |
+### 3.5 ArsenalSection (`#arsenal`) — SHIPPED statik, PLANNED entrance
 
-- Card style: Background `--color-soot`, hairline border `--color-stone`, padding generous
+4 kartu sesuai `ARSENAL_DATA` (sigil: `blades/fortress/reticle/spark`). Pertahankan stack aktual (sudah lebih akurat dari spec lama: ada `Anime.js/Lenis`, `RESTful APIs`, `Vite`, `Git CI/CD`).
+- Entrance: `scale 0.9→1, opacity, brightness` stagger 0.1s (spec lama 0.2s terlalu lambat untuk 4 kartu).
+- SVG stroke-draw hanya jika sigil berupa path SVG; jika lucide icon biasa, pakai fade+glow saja (jangan over-spec `strokeDashoffset` untuk icon fill).
+- Hover: ember underline `scaleX`, sigil glow, title scramble — semua CSS kecuali scramble (anime.js, debounce 300ms agar tidak spam saat mouse lewat cepat).
 
-**Animations:**
-1. **Card Forge Entrance** (GSAP ScrollTrigger): Cards enter from `scale: 0.9, opacity: 0, filter: brightness(0.3)` → full, stagger 0.2s
-2. **SVG Stroke Draw** (GSAP `strokeDashoffset`): Sigil icons draw themselves stroke-by-stroke as cards enter
-3. **Section Header Decode** (Anime.js): Same runic scramble resolve as other headers
-4. **Hover — Ember Underline** (Anime.js): `scaleX: 0 → 1` ember-colored line from left on hover
-5. **Hover — Sigil Glow** (Anime.js): SVG fill transitions `--color-stone` → `--color-ember`
-6. **Hover — Text Scramble** (Anime.js): Card title scrambles briefly then resolves on hover
+### 3.6 Campaigns — Phase 1 SHIPPED (grid), Phase 2 PLANNED (Three Walls Journey)
 
-### 3.6 DFCampaigns (`#campaigns`) — The Three Walls Journey
+**Phase 1 (saat ini, pertahankan sebagai fallback):** responsive grid 1→2→3 kolom, kartu `role=button tabIndex=0` + Enter/Space, slice stack max 3 + `+n`, klik → `CampaignDossierModal`. Ini yang diuji dan di-ship. Jangan hapus saat Phase 2 datang.
 
-This is the centerpiece interactive section. A GSAP ScrollTrigger-pinned horizontal journey through three concentric walls, from inside (oldest projects) to outside (newest + upcoming).
+**Phase 2 (rencana — jangan implement sebelum §5 + §7 siap):** pinned horizontal journey dengan metafora ekspedisi Survey Corps menembus 3 lapis tembok dari dalam ke luar. (Nama proyek di §3.6.1 hanya ilustrasi dari data saat ini; mapping resmi mengikuti aturan data-driven §3.6.3. "Mitras" = ujung interior zona `sina`, bukan zone terpisah.)
 
-**Camera Direction**: The viewport faces OUTWARD. You start inside Mitras (center), looking toward the walls. As you scroll, you advance outward through each wall toward the unknown territory beyond.
+#### 3.6.1 Camera & Visual POV (Kamera Menghadap ke Luar)
+Sesuai arahan desain, kamera ekspedisi **selalu menyorot/menghadap ke arah luar** (ke depan perjalanan / ke horizon kanan), bukan sebaliknya atau mundur ke dalam:
+1. **Titik Awal (Wall Sina / Mitras)**:
+   - Kamera berada di pusat terdalam, menatap lurus ke depan ke arah benteng **Wall Sina**.
+   - Menampilkan proyek-proyek era terawal / paling lama (`wallZone: 'sina'`, 2023: *FrameWork*, *Jawara*).
+2. **Breach 1 (Wall Sina Breach)**:
+   - Saat user scroll maju, viewport bergerak mendekati Wall Sina hingga memicu breach: SVG retak (`strokeDashoffset`), debris shatter (≤12 fragmen GPU transform), kilatan ember, dan trigger audio tactile (`playSound`).
+   - Kamera menembus celah reruntuhan dan tetap menatap ke depan ke arah benteng berikutnya di kejauhan.
+3. **Zona Tengah (Wall Rose)**:
+   - Kamera berada di antara Sina dan Rose, menampilkan proyek-proyek era pertengahan (`wallZone: 'rose'`, 2024: *KampungKu*, *SarPras*, *Rest Area Tycoon*).
+   - Menghadap ke arah **Wall Rose** yang menjulang di hadapan.
+4. **Breach 2 (Wall Rose Breach)**:
+   - Wall Rose retak dan runtuh dengan efek partikel + audio cue. Kamera melintasi reruntuhan menuju zona terluar.
+5. **Zona Terluar (Wall Maria)**:
+   - Kamera berada di zona Wall Maria, menampilkan proyek-proyek era terbaru (`wallZone: 'maria'`, 2024: *TrasMart*).
+   - Menghadap ke benteng terluar peradaban: **Wall Maria**.
+6. **Breach 3 (Wall Maria Breach — The Final Wall)**:
+   - Wall Maria hancur lebur. Kamera menembus keluar dari perimeter peradaban.
+7. **Beyond the Walls (Wilayah Titan Liar / Upcoming Projects)**:
+   - Kamera menatap ke horizon terbuka yang diselimuti kabut tebal (`ash` → `verdigris` gradient).
+   - Partikel kabut dingin melayang pelan (kecepatan 0.3×).
+   - Terdapat beacon / radar berkedip `⟐ EXPEDITION IN PROGRESS` sebagai representasi proyek masa depan (*incoming projects*).
 
-**Horizontal Layout** (total width ~500vw, pinned and scrubbed):
+#### 3.6.2 Technical Mechanics & Constraints
+- **Track**: `display:flex; width: max-content` di dalam pinned wrapper `height: 100vh`.
+- **GSAP**: `x: () => -(track.scrollWidth - window.innerWidth)`, `scrub: 1`, `pin: true`, `anticipatePin: 1`, `invalidateOnRefresh: true`, `end: () => '+=' + (track.scrollWidth - window.innerWidth)`.
+- **Panel sequence**: `Sina Interior → Wall Sina → Rose Zone → Wall Rose → Maria Zone → Wall Maria → Beyond The Walls`. Zone label Oswald faded; wall = full-height stone (CSS gradient + SVG noise, bukan image berat).
+- **WallBreach trigger**: crack SVG `strokeDashoffset` → debris shatter (max 12 fragmen per wall, `transform`-only) → ember flash 200ms → rumbling `x: ±4px` 300ms (hindari layout thrashing) → audio trigger via `TactileSoundProvider` (`playSound('stampThud')` atau stone crack FX).
+- **Beyond zone**: fog gradient ash→verdigris, 1–2 pulsing marker `⟐ EXPEDITION IN PROGRESS`, fog particles lambat (bukan ember).
 
+#### 3.6.3 Data Mapping
+`CAMPAIGNS_DATA` saat ini flat (`district/year`), tidak punya `wallZone`. Untuk Phase 2 tambah field opsional tanpa merusak Phase 1:
+```ts
+export type WallZone = 'sina' | 'rose' | 'maria' | 'beyond';
+export interface Campaign extends Base { 
+  wallZone?: WallZone; 
+  era?: 'oldest' | 'mid' | 'newest'; 
+}
 ```
-|-- Mitras Zone --|-- Wall Sina --|-- Rose Zone --|-- Wall Rose --|-- Maria Zone --|-- Wall Maria --|-- Beyond Zone --|
-    (oldest)         BREACH!         (mid)           BREACH!         (newest)          BREACH!        (incoming)
-   FrameWork                        SarPras                        KampungKu                        "Expedition
-    Jawara                          TrasMart                     Rest Area Tycoon                   in progress..."
-```
+Aturan distribusi (data-driven, bukan hardcode — sesuai §6):
+- `sina`: 2 proyek tertua (`era: 'oldest'`)
+- `rose`: proyek tengah (`era: 'mid'`)
+- `maria`: proyek terbaru/unggulan (`era: 'newest'`)
+- `beyond`: marker `⟐ EXPEDITION IN PROGRESS` (bukan dari `CAMPAIGNS_DATA`)
 
-**Visual Composition:**
+Contoh ilustratif dari data saat ini (bisa berubah tanpa mengubah spec): sina ← FrameWork + Jawara (2023); rose ← KampungKu + SarPras + Rest Area Tycoon (2024); maria ← TrasMart (2024).
 
-1. **Mitras Zone** (inside Wall Sina):
-   - Background: `--color-soot` with faint radial glow from center (safe interior)
-   - Zone label: `MITRAS — INNER SANCTUM` (Oswald, faded)
-   - Project cards as glowing beacons/outposts
-   - Atmosphere: relatively calm, dim interior lighting
+**Fallback (wajib):** `<1000px` ATAU `prefers-reduced-motion` ATAU chapter mode → render Phase 1 grid vertikal. Wall menjadi horizontal divider dengan crack on-reveal (bukan pin).
 
-2. **Wall Sina** (first barrier):
-   - Visual: Tall vertical structure spanning full viewport height, textured stone pattern (CSS gradient or SVG), color `--color-iron` / `--color-stone`
-   - Label on wall: `WALL SINA` (Cinzel, large, carved into stone)
-   - Gate label: `GATE: HERMIHA` (Oswald, small)
-   - **Breach animation** (GSAP): As scroll reaches the wall:
-     - Crack lines appear (SVG paths animate `strokeDashoffset`)
-     - Wall fragments break apart (child divs with `rotation`, `x`, `y` scatter via GSAP)
-     - Debris particles fall (small rect elements animated by GSAP stagger)
-     - Brief flash of `--color-ember` light through the cracks
-     - Wall clears, revealing the next zone
+Acceptance Phase 2: scroll penuh menembus 3 breach tanpa jank (>50fps di Moto G4 emulation), semua kartu tetap bisa dibuka via keyboard, `ScrollTrigger.refresh()` setelah image load.
 
-3. **Rose Zone** (between Sina and Rose):
-   - Background: slightly different shade, atmospheric particles increase
-   - Zone label: `DISTRICT TROST — ROSE TERRITORY`
-   - Project cards with more detail (tags visible)
+### 3.7 VisionSection (`#vision`) — PLANNED parallax ringan
 
-4. **Wall Rose** (second barrier):
-   - Same breach mechanic, label `WALL ROSE`, gate `GATE: TROST`
-   - Breach feels more intense (more debris, louder crack sound if audio enabled)
+Konten pertahankan (quote THE SEA ember highlight + 3 horizon goals NEXT/BEYOND/ALWAYS).
+- Horizontal text parallax: max `x: ±6%` scrub (spec lama tidak membatasi — teks yang kabur keluar viewport = gagal baca). 
+- Storm overlay opacity scrub `0→0.4` max.
+- Horizon cards stagger + divider `scaleX`. Semua nonaktif saat reduced-motion.
 
-5. **Maria Zone** (between Rose and Maria):
-   - Background darker, more ember particles, tension builds
-   - Zone label: `DISTRICT SHIGANSHINA — MARIA TERRITORY`
-   - Newest/biggest project cards (more prominent styling)
+### 3.8 SummonSection (`#summon`) — SHIPPED mailto, kontrak diperjelas
 
-6. **Wall Maria** (final barrier):
-   - Largest wall, most dramatic breach
-   - Label `WALL MARIA`, gate `GATE: SHIGANSHINA`
-   - Breach: maximum debris, flash, rumbling effect (subtle CSS translate shake on container)
+Konten + form fields sesuai implementasi aktual (NAME/CALLSIGN-EMAIL/OBJECTIVE/REPORT).
+Kontrak yang spec lama salah: bukan "form replaced with confirmation". Perilaku aktual & yang dipertahankan:
+1. `required` + `type=email` validation native. Tambah `minLength={10}` untuk REPORT + `maxLength={2000}` (baru — cegah mailto URL >2000 char pecah di klien email).
+2. Submit → `playSound('stampThud')` → `mailto:` dengan subject/body encoded → `toast.success('Raven dispatched…')`.
+3. Tambah (baru): jika body >1800 char, potong + tampilkan `toast.error` instruksi kirim manual ke `SUMMON_DATA.dispatch`. Ini edge case nyata mailto yang spec lama abaikan.
+4. Button: `DISPATCH THE REPORT →` + `aria-label`. Hover pulse CSS saja (loop anime.js border = distraksi + biaya; hapus dari spec).
+5. "Shockwave scale 1.05" → hapus; entrance cukup fade-rise 400ms.
 
-7. **Beyond the Walls** (Titan Territory):
-   - Background transitions to dense fog: CSS gradient from `--color-ash` to `--color-verdigris` hints, heavy blur overlay
-   - No clear project cards — instead:
-     - 1-2 mysterious markers pulsing/glitching: `⟐ EXPEDITION IN PROGRESS`
-     - Sub-text: *"The territory ahead hasn't been mapped yet."* (Barlow italic, faded)
-     - Ember particles replaced by slower, colder fog particles
-     - Eerie atmosphere — the unknown ahead
+### 3.9 DarkFantasyFooter — SHIPPED, fix kontras
 
-**Project Cards (within zones):**
-- Background: `--color-iron` with hairline border `--color-stone`
-- Title: Cinzel 600, `--color-bone`
-- Role/era badge: Oswald uppercase, `--color-ember`
-- Tech tags: small pills, border `--color-stone`, font Oswald
-- Thumbnail: grayscale by default, subtle color on hover
-- **Hover**: Card lifts (`translateY: -4px`), border glows `--color-ember`, thumbnail gains color
-- **Click**: Opens `DossierLightbox` with full project details
-
-**DossierLightbox (project detail modal):**
-- Fullscreen overlay, background `--color-ash` at 95% opacity
-- Content panel: project title (Cinzel), role, tech stack badges, narrative description, screenshot, links (GitHub, live)
-- **Reveal**: GSAP `fromTo` slide-up (`y: 100 → 0`), `opacity: 0 → 1`, easing `power3.out`, 500ms
-- **Dismiss**: `Escape` key or click outside. Reverse animation on close.
-
-**Mobile Responsive:**
-- Below ~1000px: horizontal journey converts to vertical stacking
-- Each zone stacks vertically, walls become horizontal barriers that crack on scroll-reveal
-- Project cards stack in single column
-
-### 3.7 DFVision (`#vision`)
-
-**Content:**
-- Section header: `04 — FUTURE VISION` (Oswald, `--color-ember`)
-- Background: full-bleed dark atmospheric gradient (storm/mist effect), parallax movement
-- Main quote (center, Cinzel):
-  > SOMEDAY I WILL REACH **THE SEA** — AND FIND, BEYOND IT, ONLY MORE WORK.
-  
-  "THE SEA" highlighted in `--color-ember`, rest in `--color-bone`
-- Sub-paragraph (center, Barlow 300, `--color-parchment`):
-  > My ambition isn't a finished product. It's a horizon that keeps receding: interfaces that anticipate intent, systems that heal themselves, tooling that lets a single engineer defend an entire wall. I'm building toward a craft where speed and humanity stop being a trade-off.
-- Three horizon goals (3-column grid, hairline divider above each):
-  - `NEXT` — *"Ship an AI-native interface framework"*
-  - `BEYOND` — *"Mentor the next scouting regiment"*
-  - `ALWAYS` — *"Refuse the comfort of the wall"*
-
-**Animations:**
-1. **Horizontal Text Parallax** (GSAP ScrollTrigger scrub): Quote lines move at different horizontal speeds on scroll
-2. **Storm Intensification** (GSAP ScrollTrigger scrub): Background overlay opacity increases as user scrolls deeper
-3. **Horizon Cards Stagger** (GSAP): Fade-in from bottom, stagger 150ms, divider lines draw themselves
-4. **Section Header Decode** (Anime.js): Same runic scramble
-
-### 3.8 DFSummon (`#summon`)
-
-**Content:**
-- Section header: `05 — SUMMON` (Oswald, `--color-ember`)
-- CTA headline: *"SOUND THE HORN."* — Cinzel 700, massive (~6rem), `--color-bone`
-- Sub-text: *"A new expedition, a stalled system, or a wall that needs rebuilding — send word. I answer every signal fired in earnest."* — Barlow 300, `--color-parchment`
-- Contact form (right side):
-  - `NAME` — placeholder: "Levi Ackerman"
-  - `CALLSIGN / EMAIL` — placeholder: "you@corps.dev"
-  - `OBJECTIVE` — placeholder: "What wall are we taking?"
-  - `REPORT` (textarea) — placeholder: "Describe the terrain, the threat, and the timeline."
-  - Labels: Oswald uppercase, letter-spacing wide, `--color-parchment`
-  - Inputs: transparent background, border-bottom `--color-stone`, color `--color-bone`
-  - Button: `DISPATCH THE REPORT →` — background `--color-blood`, border `--color-blood`, Oswald uppercase. Hover: bg → `--color-ember`, slight scale up.
-- Dispatch details (left, below CTA):
-  - `DISPATCH` — `aryoadiputro@gmail.com`
-  - `STATION` — `Malang — East Java, Indonesia`
-  - `REGIMENT` — `Available for Opportunities`
-- Submitted state: form replaced with confirmation message *"Signal received. Expect a response from beyond the wall."*
-
-**Animations:**
-1. **"SOUND THE HORN" Shockwave** (GSAP): Text enters with `scale: 1.05 → 1`, `opacity: 0 → 1`, brief ember flash on background
-2. **Form Fields Rise** (GSAP ScrollTrigger): Staggered `y: 40 → 0`, `opacity: 0 → 1`, border-bottom draws `scaleX: 0 → 1`
-3. **Button Hover Pulse** (Anime.js): Border color oscillates `--color-blood` ↔ `--color-ember` on loop
-
-### 3.9 DFFooter
-
-- Hairline divider `--color-stone` on top
-- Left: `A.PUTRO — DEDICATE YOUR HEART` (Oswald, `--color-stone`)
-- Right: `© 2026 · BUILT BEYOND THE WALLS` (Oswald, `--color-stone`)
-- Minimal padding, font size small
+Hairline stone, kiri callsign + `DEDICATE YOUR HEART`, kanan `© 2026 · BUILT BEYOND THE WALLS`. Naikkan warna teks ke `--color-parchment` 60% (saat ini stone = gagal kontras).
 
 ---
 
-## 4. Ember Canvas Particle System
+## 4. Ember Canvas Particle System — SHIPPED, batasan ditambah
 
-**Component**: `EmberCanvas.tsx`
-
-- Full-viewport `<canvas>` element, positioned `fixed`, `z-index: 1`, `pointer-events: none`
-- 30-50 particles representing floating embers/ash
-- Each particle: small circle (1-3px radius), color randomly chosen from `--color-ember`, `--color-blood`, `--color-rust`
-- Behavior: drift upward slowly, slight horizontal sway (sine wave), random opacity (0.2-0.6), random lifespan with fade-out and respawn
-- Rendered via `requestAnimationFrame` loop, synced with Lenis scroll position for subtle parallax
-- Performance: lightweight, no heavy computation, skip if `prefers-reduced-motion` is set
+`EmberCanvas.tsx` sudah benar (rAF loop, resize handler, reduced-motion + jsdom guard, `count=35`).
+Tambahan (baru):
+- **[TODO]** Pause saat tab hidden (`visibilitychange` → `cancelAnimationFrame`) — hemat baterai.
+- Tidak perlu pause saat modal open / chapter mode (canvas `pointer-events-none`, biaya ~35 arc fill/frame dapat diabaikan). Jangan sinkron ke Lenis scroll position (spec lama menyarankan parallax sync — biaya per-frame untuk efek sub-piksel; hapus).
+- Budget: ≤50 partikel desktop, ≤20 jika `deviceMemory < 4` atau `hardwareConcurrency < 4` atau viewport <768px. Radius 1–3px, tanpa shadowBlur (mahal).
+- Fog particles Beyond zone (Phase 2) = sistem terpisah dengan warna verdigris + speed 0.3×, bukan mode/varian EmberCanvas.
 
 ---
 
-## 5. Lenis Smooth Scroll Integration
+## 5. Lenis Smooth Scroll Integration — SHIPPED, pola GSAP ditambah
 
-**Implementation**: Replace the current no-op `SmoothScroll.tsx` with a real Lenis wrapper.
+`SmoothScroll.tsx` SUDAH real (duration 1.2, expo easing, `smoothWheel`, reduced-motion + ResizeObserver guard, `scrollTo` fallback `scrollIntoView`). Pertahankan.
 
-- Initialize `Lenis` instance with:
-  - `duration: 1.2`
-  - `easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))`
-  - `smoothWheel: true`
-  - `wheelMultiplier: 1`
-- Sync with GSAP ScrollTrigger via `lenis.on('scroll', ScrollTrigger.update)`
-- Provide `useLenisScroll()` hook for components to access `lenis.scrollTo(target)` and current scroll progress
-- Pause Lenis when `DossierLightbox` is open (prevent background scroll)
+Yang belum ada dan WAJIB sebelum animasi §3.3/3.4/3.6:
+- Pola §2.2 (`lenis.on('scroll', ScrollTrigger.update)` + `gsap.ticker`).
+- `lenis.stop()/start()` pada modal open/close.
+- `ScrollTrigger.refresh()` setelah fonts/images load + setelah toggle fluid/chapter.
+- Wheel `orientation: 'vertical'` saja; jangan tambah `smoothTouch` (merusak ekspektasi swipe mobile).
 
 ---
 
-## 6. Data Adaptation (`darkFantasyData.ts`)
+## 6. Data Adaptation (`src/lib/dark-fantasy-data.ts` — perhatikan kebab-case)
 
-Centralized content file mapping Aryo Adi Putro's actual data to the dark fantasy theme:
+File sudah ada dengan tipe `Campaign`, `ArsenalQuadrant`, `HERO_DATA`, `CREED_DATA`, `ARSENAL_DATA`, `CAMPAIGNS_DATA`, `SUMMON_DATA`. Spec lama menunjuk `darkFantasyData.ts` + field yang tidak ada (`callsign/regNumber/headline/...`) — abaikan, ikuti file aktual.
 
-| Data | Value |
-|------|-------|
-| `callsign` | `A.PUTRO` |
-| `regNumber` | `REG. NO. 104` |
-| `role` | `FULL STACK DEVELOPER` |
-| `subtitleBadge` | `SURVEY CORPS OF SOFTWARE` |
-| `headline` | `BEYOND / THE WALLS` |
-| `heroSubtext` | Adapted from Figma |
-| `creedQuote` | Adapted manifesto |
-| `creedNarrativeLeft` | Adapted for 2+ years experience |
-| `creedNarrativeRight` | Adapted philosophy |
-| `stats` | `{ years: '2+', systems: '6+', walls: '∞' }` |
-| `arsenalCards` | 4 categories mapped from `TECH_ARSENAL` |
-| `campaigns` | `MISSIONS_DATA` mapped to wall zones |
-| `visionQuote` | From Figma |
-| `horizonGoals` | NEXT, BEYOND, ALWAYS |
-| `dispatch` | email, station (Malang), regiment |
-| `footer` | `A.PUTRO — DEDICATE YOUR HEART` |
+Drift yang harus diputuskan & resolusi rekomendasi:
+| Item | Spec lama | Aktual | Rekomendasi / Keputusan |
+|------|-----------|--------|-------------------------|
+| Callsign | `A.PUTRO` | `Aryo A.P` | Tetap `Aryo A.P` di data & test suite agar tidak memecahkan snapshot test; `A.PUTRO` diizinkan sebagai alias pendek khusus di HUD jika diperlukan. |
+| Stats | `2+/6+/∞` | `02+/06+/100%` | Ganti `100% MISSION RELIABILITY` dengan metrik nyata yang verifiable (misal `04+ REGIMENTS / ORGANIZATIONS`) saat update data. |
+| Campaign districts | Wall zones | `DISTRICT TROST` dkk flat | Tambah opsional `wallZone: 'sina' \| 'rose' \| 'maria' \| 'beyond'` (Phase 2), mapping: Sina (2023), Rose (2024 mid), Maria (2024 latest), Beyond (upcoming). |
+| Role | `FULL STACK` | `full stack` / per-campaign role | Pertahankan per-campaign `role` aktual. |
 
-### Wall Zone Mapping
-
-| Wall Zone | Projects (from `MISSIONS_DATA`) |
-|-----------|--------------------------------|
-| **Mitras** (inside Sina) | FrameWork (2022), Jawara (2022) |
-| **Rose Territory** (Sina-Rose) | SarPras (2023), TrasMart (2023) |
-| **Maria Territory** (Rose-Maria) | KampungKu (2024), Rest Area Tycoon (2024) |
-| **Beyond the Walls** | Incoming marker(s) |
+Aturan: spec tidak meng-hardcode judul proyek / email / stats. Semua dari `dark-fantasy-data.ts`. Ubah data = tidak perlu ubah spec.
 
 ---
 
-## 7. Accessibility & Performance
+## 7. Accessibility & Performance (diperketat dari spec lama yang generik)
 
-- All animations respect `prefers-reduced-motion`: reduced to simple fade-in/out, no pinning, no particles
-- Semantic HTML: `<header>`, `<nav>`, `<main>`, `<section>`, `<footer>`
-- All interactive elements have `aria-label` and keyboard navigation
-- Focus management in `DossierLightbox` (trap focus, restore on close)
-- Ember canvas skipped entirely for reduced-motion users
-- GSAP ScrollTrigger cleanup on unmount (prevent memory leaks)
-- Images lazy-loaded with `loading="lazy"`
-- Font display: `swap` for all Google Fonts
+- `prefers-reduced-motion`: [DONE] matikan Lenis, matikan EmberCanvas. [TODO] pin/scrub/parallax/counter/scramble → tampilkan state akhir langsung. Satu hook `useReducedMotion` untuk semua (belum ada — masih guard `matchMedia` tersebar per file).
+- Semantic: `header/nav/main/section/footer` [DONE sebagian]. [TODO] tiap section `aria-labelledby` ke heading-nya (contoh: `HeroSection#home` belum punya).
+- `CampaignDossierModal`: [DONE] `role=dialog aria-modal=true`, `Escape` close. [TODO] `aria-label`, focus trap (Tab cycling), focus restore ke kartu pemicu, `lenis.stop()` + `body overflow hidden` saat open, `z-[90]`. Kartu: `role=button tabIndex=0` + Enter/Space [DONE] — pertahankan.
+- Kontras: body ≥4.5:1 (bone/parchment di ash OK); ember hanya large text/accent; perbaiki footer stone.
+- Perf budget (baru): TTI < 3.5s 4G, scroll ≥50fps selama scrub, JS animasi tidak menyentuh properti layout (`transform`/`opacity` saja), image `loading=lazy` + dimensi eksplisit (cegah CLS), font `display=swap` (sudah).
+- Cleanup: tiap `useEffect` GSAP harus `ctx.revert()` / `trigger.kill()` + `lenis.destroy()` / `cancelAnimationFrame`. Kebocoran ScrollTrigger adalah bug P0.
+- jsdom guards (`matchMedia`, `ResizeObserver`, `scrollIntoView`) mengikuti preseden kode — pertahankan agar `vitest` tidak pecah.
 
 ---
 
@@ -412,26 +389,43 @@ Centralized content file mapping Aryo Adi Putro's actual data to the dark fantas
 
 | Breakpoint | Behavior |
 |------------|----------|
-| `>=1200px` | Full experience: nav rail visible, hero text ~12vw, 2x2 arsenal grid, horizontal campaigns journey |
-| `1000-1199px` | Nav rail hidden, hero text scales down, arsenal 2x2 maintained |
-| `768-999px` | Campaigns converts to vertical stacking, 2-column layouts become single column |
-| `<768px` | Full mobile: single column everything, hero text ~10vw min, form fields stack, campaigns vertical with horizontal wall breaches |
+| `>=1200px` | Full: nav rail, hero ~11rem max (clamp, bukan 12vw mentah — cegah overflow ultrawide), arsenal 2×2, Phase 2 horizontal (jika diaktifkan) |
+| `1000-1199px` | Nav rail hidden, hero scales via `clamp()`, arsenal 2×2 |
+| `768-999px` | Phase 2 nonaktif → grid vertikal; 2-kolom → 1 kolom; pin creed nonaktif |
+| `<768px` | Single column; hero `clamp(3rem, 14vw, 5rem)`; form stack; ember count ≤20; walls = horizontal divider |
+
+Gunakan `clamp()` untuk display type, bukan `vw` murni (spec lama `~12vw` pecah di 320px dan 2560px).
 
 ---
 
 ## 9. Verification Plan
 
 ### Automated
-- `npm run build` — no TypeScript or bundling errors
-- `npm run lint` — no linting violations
-- Existing `vitest` tests still pass
+- `npm run build` — no TS/bundling errors.
+- `npm run lint` — no violations (termasuk `react-hooks/exhaustive-deps` pada efek GSAP/Lenis).
+- `npm test` (script = `vitest run`) — suite dark-fantasy hijau: shell mode toggle, nav rail select, modal open/close + Escape, form mailto encoding, reduced-motion guard. (File test ada: `dark-fantasy-shell`, `campaigns-section`, `creed-section`, `hero-section`, `smooth-scroll`, `vision-summon`, `tactical-hud`, `dark-fantasy-data` — pastikan assertion-nya mencakup daftar ini, bukan sekadar render.)
+- Tambah test baru untuk: `TextScramble` resolve, `useReducedMotion`, Phase 2 fallback (<1000px → grid), `wallZone` mapping tidak merusak Phase 1.
 
-### Manual
-- Visual inspection of all 6 sections in Chrome, Firefox, Safari
-- Scroll through entire page verifying all GSAP animations trigger correctly
-- Test Three Walls journey: scroll through all breaches, click project cards, open/close lightbox
-- Test `Escape` key dismisses lightbox
-- Test mobile viewport (Chrome DevTools responsive mode)
-- Verify `prefers-reduced-motion` fallback
-- Verify Lenis smooth scroll and anchor navigation (`#creed`, `#arsenal`, etc.)
-- Performance check: 60fps during scroll and animations (Chrome DevTools Performance tab)
+### Manual (dengan acceptance criteria)
+- [ ] Scroll fluid penuh 6 section: semua reveal trigger sekali, tanpa flicker/pin tertinggal.
+- [ ] Phase 2 (jika aktif): 3 breach berurutan, kartu bisa dibuka via mouse + keyboard, tutup via Escape/outside.
+- [ ] `Escape` menutup modal + fokus kembali ke kartu pemicu.
+- [ ] Mobile 360px: tidak ada horizontal overflow (`overflow-x` check), form submit dengan REPORT 2000 char tidak pecah.
+- [ ] `prefers-reduced-motion`: tidak ada pin/parallax/partikel/counter; konten langsung terbaca.
+- [ ] Lenis anchor `#creed/#arsenal/#campaigns/#vision/#summon` smooth-scroll tepat di bawah header (offset header).
+- [ ] Perf tab: scrub Campaigns ≥50fps, tidak ada forced reflow (layout shift ungu).
+- [ ] Kontras footer + badge lolos cek manual (devtools contrast).
+
+### Non-goals (baru — cegah scope creep)
+- Backend form / API pengiriman email. Tetap `mailto:`.
+- Three.js / WebGL walls. Tetap CSS/SVG.
+- Migrasi Tailwind v4 / rename komponen massal. Tidak dalam spec ini.
+
+---
+
+## 10. Risiko (baru)
+
+1. **Pin + Lenis desync** → mitigasi pola §2.2 + `invalidateOnRefresh`. Jika tetap jank di low-end, Phase 2 dimatikan via feature flag, grid tetap jalan.
+2. **500vw track boros memori** → batasi fragmen debris (≤12/wall), gambar lazy, tidak ada `backdrop-blur` full-track.
+3. **Drift data vs spec** (callsign, stats) → kunci di §6; perubahan copy tidak boleh memecahkan test snapshot tanpa update test.
+4. **Ganda Lenis** → larangan §2.2; review wajib menolak Lenis baru di luar `SmoothScroll.tsx`.

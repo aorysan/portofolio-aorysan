@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { VISION_DATA } from '../../lib/dark-fantasy-data';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
+import { useLenisContext } from '../SmoothScroll';
 
 // Task 4 carry-forward: strengthened guard — brief verbatim
 // `typeof window !== 'undefined'` alone crashes jsdom because ScrollTrigger
@@ -15,6 +16,7 @@ export const VisionSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const reducedMotion = useReducedMotion();
+  const { refreshTriggers } = useLenisContext();
   const [videoFailed, setVideoFailed] = useState(false);
   const showVideo = !reducedMotion && !videoFailed;
 
@@ -99,6 +101,7 @@ export const VisionSection: React.FC = () => {
           playsInline
           preload="metadata"
           poster={posterSrc}
+          onLoadedData={() => refreshTriggers()}
           onError={() => setVideoFailed(true)}
           className="absolute inset-0 h-full w-full object-cover opacity-25 pointer-events-none"
         >

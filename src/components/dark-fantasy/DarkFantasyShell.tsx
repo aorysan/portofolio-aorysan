@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { useLenisContext } from '../SmoothScroll';
 import { useTactileSound } from '../dossier/TactileSoundManager';
 import { useSectionSpy } from '../../hooks/useSectionSpy';
+import { useNavLock } from '../../hooks/useNavLock';
 import { EmberCanvas } from './EmberCanvas';
 import { TacticalHeader } from './TacticalHeader';
 import { NavRail } from './NavRail';
@@ -22,13 +23,19 @@ export const DarkFantasyShell: React.FC = () => {
   const { isMuted, toggleMute, playSound } = useTactileSound();
   const [activeIndex, setActiveIndex] = useState(0);
 
-  useSectionSpy(SECTION_IDS, setActiveIndex);
+  // Navigation lock: a rail/ADVANCE click owns the highlight until the
+  // smooth-scroll settles. Stale scroll-spy toggles mid-flight (or from
+  // not-yet-refreshed trigger positions) can't yank the rail elsewhere.
+  // Free manual scroll has no lock, so the spy stays live then.
+  const { lock, handleSpy } = useNavLock(setActiveIndex);
+  useSectionSpy(SECTION_IDS, handleSpy);
 
   // Clamp the index, highlight the rail, and smooth-scroll to the anchor.
   const goToSection = useCallback(
     (index: number) => {
       const clamped = Math.max(0, Math.min(index, SECTION_IDS.length - 1));
       playSound('paperSlide');
+      lock(clamped);
       setActiveIndex(clamped);
       const id = SECTION_IDS[clamped];
       if (id) {
@@ -44,7 +51,7 @@ export const DarkFantasyShell: React.FC = () => {
         });
       }
     },
-    [scrollTo, playSound]
+    [scrollTo, playSound, lock]
   );
 
   const handleSelectSection = useCallback(

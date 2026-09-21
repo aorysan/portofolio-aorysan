@@ -54,4 +54,17 @@ describe('DarkFantasyShell Integration', () => {
       window.removeEventListener('creed:complete', spy);
     }
   });
+
+  it('keeps the rail highlight on VISION after clicking it (no jump to SUMMON)', () => {
+    render(
+      <TactileSoundProvider>
+        <DarkFantasyShell />
+      </TactileSoundProvider>
+    );
+    const visionBtn = screen.getByRole('button', { name: /jump to section vision/i });
+    fireEvent.click(visionBtn);
+    expect(visionBtn).toHaveAttribute('aria-current', 'true');
+    const summonBtn = screen.getByRole('button', { name: /jump to section summon/i });
+    expect(summonBtn).not.toHaveAttribute('aria-current');
+  });
 });

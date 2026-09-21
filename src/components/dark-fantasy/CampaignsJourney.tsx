@@ -36,7 +36,10 @@ export const CampaignsJourney: React.FC<{
           scrub: 1,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          end: '+=320%',
+          // 4 stops (Sina → Rose → Maria → Beyond finale, single copy).
+          // Outer stays h-screen; pin distance alone drives the dive.
+          // Generous distance so each wall breathes instead of flashing by.
+          end: '+=420%',
         },
       });
 
@@ -74,7 +77,9 @@ export const CampaignsJourney: React.FC<{
       tl.to('[data-breach="rose"]', { opacity: 0, duration: 0.3 });
       tl.fromTo('[data-layer="maria"]', { opacity: 0, scale: 0.9, pointerEvents: 'none' }, { opacity: 1, scale: 1, pointerEvents: 'auto', ease: 'none', duration: 0.5 });
 
-      // Zone 3: Wall Maria -> Breach -> Beyond The Walls
+      // Zone 3: Wall Maria -> Breach -> Beyond finale (single copy).
+      // Maria dissolves, final breach flashes behind, Beyond settles as the
+      // last pinned stop before Vision (#vision) takes over.
       tl.to('[data-layer="maria"]', { scale: 1.6, opacity: 0, pointerEvents: 'none', ease: 'none', duration: 1 });
       tl.fromTo(
         '[data-breach="maria"]',
@@ -107,7 +112,7 @@ export const CampaignsJourney: React.FC<{
           onOpenDossier(item);
         }
       }}
-      className="group relative w-full min-w-0 max-w-[280px] lg:max-w-[320px] xl:max-w-[360px] flex-shrink p-5 lg:p-6 xl:p-8 rounded border border-[#2a2723] bg-[#0a0908] hover:border-[#b4442e] transition-all duration-300 cursor-pointer text-left flex flex-col justify-between"
+      className="group relative w-full min-w-0 max-w-[280px] lg:max-w-[320px] xl:max-w-[360px] flex-shrink p-5 lg:p-6 xl:p-8 rounded border border-[#2a2723] bg-[#0a0908]/90 backdrop-blur-[1px] hover:border-[#b4442e] transition-all duration-300 cursor-pointer text-left flex flex-col justify-between shadow-[0_8px_32px_rgba(0,0,0,0.55)]"
     >
       <div>
         <div className="flex items-center justify-between text-xs font-military tracking-widest text-[#b7ad99]/70 gap-2">
@@ -154,12 +159,32 @@ export const CampaignsJourney: React.FC<{
   );
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: '420vh' }}>
-      <div className="sticky top-0 h-screen overflow-hidden">
+    <div ref={containerRef} className="relative w-full h-screen overflow-hidden">
+      <div className="relative h-screen overflow-hidden">
+        {/* Breach backdrops — always BEHIND card layers (z-0 vs z-10) */}
+        <div
+          data-breach="sina"
+          className="absolute inset-0 z-0 pointer-events-none opacity-0"
+        >
+          <WallBreach wallName="WALL SINA" zoneLabel="BREACH PERIMETER I" isBreached />
+        </div>
+        <div
+          data-breach="rose"
+          className="absolute inset-0 z-0 pointer-events-none opacity-0"
+        >
+          <WallBreach wallName="WALL ROSE" zoneLabel="BREACH PERIMETER II" isBreached />
+        </div>
+        <div
+          data-breach="maria"
+          className="absolute inset-0 z-0 pointer-events-none opacity-0"
+        >
+          <WallBreach wallName="WALL MARIA" zoneLabel="FINAL PERIMETER BREACH" isBreached />
+        </div>
+
         {/* Sina Zone (Oldest / Interior) */}
         <div
           data-layer="sina"
-          className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12"
+          className="absolute inset-0 z-10 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12"
         >
           <div className="flex items-center gap-4 lg:gap-5 xl:gap-8 max-w-7xl w-full justify-center">
             <div className="w-48 lg:w-56 xl:w-72 flex-shrink-0 text-left">
@@ -177,18 +202,10 @@ export const CampaignsJourney: React.FC<{
           </div>
         </div>
 
-        {/* Breach 1 */}
-        <div
-          data-breach="sina"
-          className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 z-20"
-        >
-          <WallBreach wallName="WALL SINA" zoneLabel="BREACH PERIMETER I" isBreached />
-        </div>
-
         {/* Rose Zone (Mid) */}
         <div
           data-layer="rose"
-          className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 opacity-0 pointer-events-none"
+          className="absolute inset-0 z-10 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 opacity-0 pointer-events-none"
         >
           <div className="flex items-center gap-4 lg:gap-5 xl:gap-8 max-w-7xl w-full justify-center">
             <div className="w-48 lg:w-56 xl:w-72 flex-shrink-0 text-left">
@@ -206,18 +223,10 @@ export const CampaignsJourney: React.FC<{
           </div>
         </div>
 
-        {/* Breach 2 */}
-        <div
-          data-breach="rose"
-          className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 z-20"
-        >
-          <WallBreach wallName="WALL ROSE" zoneLabel="BREACH PERIMETER II" isBreached />
-        </div>
-
         {/* Maria Zone (Latest) */}
         <div
           data-layer="maria"
-          className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 opacity-0 pointer-events-none"
+          className="absolute inset-0 z-10 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 opacity-0 pointer-events-none"
         >
           <div className="flex items-center gap-4 lg:gap-5 xl:gap-8 max-w-7xl w-full justify-center">
             <div className="w-48 lg:w-56 xl:w-72 flex-shrink-0 text-left">
@@ -235,18 +244,10 @@ export const CampaignsJourney: React.FC<{
           </div>
         </div>
 
-        {/* Breach 3 */}
-        <div
-          data-breach="maria"
-          className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 z-20"
-        >
-          <WallBreach wallName="WALL MARIA" zoneLabel="FINAL PERIMETER BREACH" isBreached />
-        </div>
-
-        {/* Beyond The Walls (Horizon) */}
+        {/* Beyond The Walls — single finale copy (the only one in the journey) */}
         <div
           data-layer="beyond"
-          className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 opacity-0 pointer-events-none"
+          className="absolute inset-0 z-10 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 opacity-0 pointer-events-none"
         >
           <div className="w-full max-w-lg flex-shrink-0 p-8 xl:p-12 rounded border border-[#2a2723] bg-gradient-to-r from-[#0a0908] to-[#4d6155]/20 text-left flex flex-col justify-center">
             <span className="font-military text-xs tracking-[0.3em] text-[#4d6155] uppercase">

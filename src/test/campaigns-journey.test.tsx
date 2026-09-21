@@ -5,7 +5,7 @@ import { CampaignsJourney } from '../components/dark-fantasy/CampaignsJourney';
 import { TactileSoundProvider } from '../components/dossier/TactileSoundManager';
 
 describe('CampaignsJourney Component (Phase 2)', () => {
-  it('renders all 3 wall breach sections and beyond horizon marker', () => {
+  it('renders 3 wall zones + single Beyond finale with breach backdrops behind cards', () => {
     render(
       <TactileSoundProvider>
         <CampaignsJourney onOpenDossier={vi.fn()} />
@@ -18,6 +18,19 @@ describe('CampaignsJourney Component (Phase 2)', () => {
     expect(screen.getAllByText('WALL SINA').length).toBeGreaterThan(0);
     expect(screen.getAllByText('WALL ROSE').length).toBeGreaterThan(0);
     expect(screen.getAllByText('WALL MARIA').length).toBeGreaterThan(0);
+    // Single Beyond finale copy — no duplicates.
+    expect(screen.getAllByText('BEYOND THE WALLS').length).toBe(1);
     expect(screen.getByText(/EXPEDITION IN PROGRESS/i)).toBeInTheDocument();
+    // Breach backdrops sit behind card layers so cards stay clickable.
+    const breaches = [...document.querySelectorAll('[data-breach]')];
+    const layers = [...document.querySelectorAll('[data-layer]')];
+    expect(breaches.length).toBe(3);
+    expect(layers.length).toBe(4);
+    breaches.forEach((b) => {
+      expect(b.className).toContain('z-0');
+    });
+    layers.forEach((l) => {
+      expect(l.className).toContain('z-10');
+    });
   });
 });

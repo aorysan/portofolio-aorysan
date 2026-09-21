@@ -8,6 +8,9 @@ interface WallBreachProps {
   progress?: number;
 }
 
+const NOISE_URI =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")";
+
 export const WallBreach: React.FC<WallBreachProps> = ({
   wallName,
   zoneLabel,
@@ -32,47 +35,103 @@ export const WallBreach: React.FC<WallBreachProps> = ({
   // Max 12 debris fragments (Spec §3.6.2 & §10: GPU transform only)
   const debrisFragments = Array.from({ length: 12 }, (_, i) => ({
     id: i,
-    dx: ((i % 4) - 1.5) * 40,
-    dy: Math.floor(i / 4) * 35 - 35,
+    dx: ((i % 4) - 1.5) * 56,
+    dy: Math.floor(i / 4) * 44 - 44,
     rotate: (i - 6) * 15,
   }));
 
   const crackOpacity = typeof progress === 'number' ? Math.min(1, Math.max(0, progress)) : undefined;
 
   return (
-    <div className="relative w-72 sm:w-96 h-[80vh] flex-shrink-0 flex flex-col items-center justify-center border-x-2 border-[#2a2723] bg-gradient-to-b from-[#1c1a17] via-[#12100e] to-[#0a0908] px-8 text-center select-none overflow-hidden">
-      {/* Stone Texture Lines & Noise */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#2a2723_1px,transparent_1px)] [background-size:16px_16px]" />
+    <div
+      aria-hidden="true"
+      className="pointer-events-none relative w-full h-full min-h-[100vh] select-none overflow-hidden bg-[#12100e]"
+    >
+      {/* Base stone gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#26221d] via-[#171411] to-[#0a0908]" />
 
-      {/* Outward Facing Fortification Header */}
-      <div className="relative z-10 space-y-3">
-        <span className="font-military text-xs tracking-[0.3em] text-[#b4442e]">
+      {/* Masonry courses: horizontal mortar every 96px */}
+      <div
+        className="absolute inset-0 opacity-60"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(to bottom, transparent 0px, transparent 94px, rgba(0,0,0,0.65) 94px, rgba(0,0,0,0.65) 97px, rgba(214,207,194,0.07) 97px, rgba(214,207,194,0.07) 98px, transparent 98px)',
+        }}
+      />
+      {/* Vertical joints, staggered: two offset layers */}
+      <div
+        className="absolute inset-0 opacity-50"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(to right, transparent 0px, transparent 118px, rgba(0,0,0,0.6) 118px, rgba(0,0,0,0.6) 121px, transparent 121px)',
+          backgroundSize: '240px 96px',
+          backgroundPosition: '0 0',
+        }}
+      />
+      <div
+        className="absolute inset-0 opacity-40"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(to right, transparent 0px, transparent 118px, rgba(0,0,0,0.55) 118px, rgba(0,0,0,0.55) 121px, transparent 121px)',
+          backgroundSize: '240px 192px',
+          backgroundPosition: '120px 96px',
+        }}
+      />
+      {/* Per-block tonal variation */}
+      <div
+        className="absolute inset-0 opacity-30"
+        style={{
+          backgroundImage:
+            'linear-gradient(115deg, rgba(255,255,255,0.05) 0%, transparent 25%, transparent 60%, rgba(0,0,0,0.35) 100%), radial-gradient(ellipse 60% 40% at 20% 15%, rgba(214,207,194,0.08), transparent 70%), radial-gradient(ellipse 50% 35% at 85% 80%, rgba(0,0,0,0.5), transparent 70%)',
+        }}
+      />
+      {/* Stone grain noise */}
+      <div
+        className="absolute inset-0 opacity-[0.35] mix-blend-overlay"
+        style={{ backgroundImage: NOISE_URI, backgroundSize: '160px 160px' }}
+      />
+      {/* Vignette + top light / bottom weight for depth */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_50%_40%,transparent_40%,rgba(0,0,0,0.55)_100%)]" />
+      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/[0.04] to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/60 to-transparent" />
+
+      {/* Engraved ghost wall name (backdrop, never covers cards) */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+        <span className="font-military text-[11px] tracking-[0.35em] text-[#b4442e]/80 uppercase">
           {zoneLabel}
         </span>
-        <h3 className="font-display text-4xl sm:text-5xl font-black text-[#d6cfc2] tracking-wider">
+        <span
+          aria-label={wallName}
+          className="font-display text-[13vw] lg:text-[9rem] font-black leading-none tracking-tight text-transparent opacity-20 mt-2"
+          style={{ WebkitTextStroke: '1.5px #d6cfc2' }}
+        >
           {wallName}
-        </h3>
-        <p className="font-military text-[11px] tracking-widest text-[#b7ad99]/60 uppercase">
+        </span>
+        <span className="font-military text-[10px] tracking-[0.3em] text-[#b7ad99]/40 uppercase mt-3">
           PERIMETER DEFENSE SECTOR
-        </p>
+        </span>
       </div>
 
-      {/* Wall Breach SVG Crack */}
-      <div className="relative my-8 w-full max-w-[200px] h-32 flex items-center justify-center">
+      {/* Breach crack — centered, glows when breached */}
+      <div className="absolute inset-0 flex items-center justify-center">
         <svg
           viewBox="0 0 100 100"
-          className="w-full h-full stroke-[#b4442e] fill-none stroke-2 transition-all duration-700"
+          className="w-56 h-56 sm:w-72 sm:h-72 stroke-[#b4442e] fill-none stroke-2 transition-all duration-700"
           style={{
             opacity: crackOpacity ?? 1,
-            filter: isBreached ? 'drop-shadow(0 0 8px #b4442e)' : undefined,
+            filter: isBreached
+              ? 'drop-shadow(0 0 10px rgba(180,68,46,0.9)) drop-shadow(0 0 28px rgba(180,68,46,0.35))'
+              : 'drop-shadow(0 2px 6px rgba(0,0,0,0.8))',
           }}
         >
-          <path d="M50 0 L55 30 L45 50 L60 75 L50 100" />
+          <path d="M50 0 L55 30 L45 50 L60 75 L50 100" strokeWidth={isBreached ? 2.5 : 1.5} />
           <path d="M55 30 L70 40" />
           <path d="M45 50 L30 65" />
+          <path d="M60 75 L74 82" opacity={0.7} />
+          <path d="M45 50 L52 62" opacity={0.6} />
         </svg>
 
-        {/* 12 GPU-accelerated Debris Fragments */}
+        {/* 12 GPU-accelerated debris fragments */}
         {debrisFragments.map((frag) => (
           <span
             key={frag.id}
@@ -88,7 +147,8 @@ export const WallBreach: React.FC<WallBreachProps> = ({
         ))}
       </div>
 
-      <div className="relative z-10 flex items-center gap-2 font-military text-xs tracking-widest text-[#b7ad99]">
+      {/* Status pill — kept for isBreached contract, subtle bottom */}
+      <div className="absolute bottom-8 inset-x-0 flex items-center justify-center gap-2 font-military text-[11px] tracking-[0.25em] text-[#b7ad99]/70">
         <span className="w-2 h-2 rounded-full bg-[#b4442e] animate-ping" />
         <span>{isBreached ? 'BREACH ENGAGED' : 'FORTIFICATION INTACT'}</span>
       </div>

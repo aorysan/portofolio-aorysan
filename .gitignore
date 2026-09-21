@@ -27,7 +27,8 @@ dist-ssr
 .worktrees/
 .superpowers/
 
-# Media assets generated locally
-public/videos/*.mp4
+# Media assets generated locally (large raws ignored, shipped loop explicitly allowed)
 public/videos/*.raw.mp4
+public/videos/*.mp4
+!public/videos/vision-sea-loop.mp4
 
